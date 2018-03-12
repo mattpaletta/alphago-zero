@@ -21,8 +21,8 @@ class Node:
       self.C = 1     #exploration constant
       self.children = [None]
    def calculateU(self):      #TODO will also have to take into account whose turn it is
-      self.U = self.W*self.friendly_turn/self.N+self.C*self.P*math.sqrt(math.log(self.parent.N)/(1+self.N))
       self.N+=1
+      self.U = self.W*self.friendly_turn/self.N+self.C*self.P*math.sqrt(math.log(self.parent.N)/(1+self.N))
       self.parent.W += self.W    
       push_value_to_network("W", self.board, self.W/self.N)    #TODO update the W NN with this value. 
 
