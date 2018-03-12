@@ -61,7 +61,7 @@ def update(node):
       update(node.parent)
 
 def push_value_to_network(type, node, value):
-   return 0
+   return 1
 
 def return_value_from_network():     #replace this with values from network
    return 1
@@ -69,7 +69,7 @@ def return_value_from_network():     #replace this with values from network
 
 #the function. assumes it always starts out on friendly turn
 def find_optimal_path(board_layout):
-   root_node = Node(None, board_layout)
+   root_node = Node(None, board_layout, -1)
    while(searching):
       friendly_turn = -1
       temp_node = select(root_node)
