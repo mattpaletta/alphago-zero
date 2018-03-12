@@ -45,13 +45,15 @@ def select(node):
 
 
 #creates all possible children from current state
-def expand(node):
-   #for each board reachable by the current board
-   possible_outcomes = return_value_from_network() #array of adjacent board positions
-   for x in range(len(possible_outcomes)):
-      child = Node(node, possible_outcomes[x], friendly_turn)
-      node.children.append(child)
-      update(child)
+#if this isnt a terminal board position
+def expand(node, board_layout):
+   if(determine_if_terminal(board_layout) == False):
+      #for each board reachable by the current board
+      possible_outcomes = return_value_from_network() #array of adjacent board positions
+      for x in range(len(possible_outcomes)):
+         child = Node(node, possible_outcomes[x], friendly_turn)
+         node.children.append(child)
+         update(child)
 
 
 #propogates new values up the network
@@ -59,6 +61,9 @@ def update(node):
    if(node != root_node):
       node.calculateU()
       update(node.parent)
+
+def determine_if_terminal(board_layout):
+   return False
 
 def push_value_to_network(type, node, value):
    return 1
@@ -73,7 +78,7 @@ def find_optimal_path(board_layout):
    while(searching):
       friendly_turn = -1
       temp_node = select(root_node)
-      expand(temp_node)
+      expand(temp_node, temp_node.board)
    most_explore_count = 0
    most_explored = None
    for x in range(len(root_node.children)):
