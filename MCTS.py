@@ -8,7 +8,9 @@ friendly_turn = -1
 #linked list style
 class Node:
    def __init__(self, parent, board, turn):
+      #variable for determining whose turn the board position is from
       self.friendly_turn = turn
+
       self.parent = parent
       self.board = board
 
@@ -18,23 +20,28 @@ class Node:
       if(determine_if_terminal(board)):
          self.W = determine_if_terminal(board)
       else:
-         self.W = return_value_from_network() #get W from network     
-      self.N = 0
-      self.P = return_value_from_network() #get p from network
+         self.W = return_value_from_network()
+      self.N = 0     #visit count 
+
+      
+      self.P = return_value_from_network() #probability of being chosen
       self.C = 1     #exploration constant
       self.children = [None]
-   def calculateU(self):      #TODO will also have to take into account whose turn it is
+   def calculateU(self):
       self.N+=1
+
+      #U is score for how valuable this position is in being determined
       self.U = self.W*self.friendly_turn/self.N+self.C*self.P*math.sqrt(math.log(self.parent.N)/(1+self.N))
+
+      #propogate W back up network
       self.parent.W += self.W    
-      push_value_to_network("W", self.board, self.W/self.N)    #TODO update the W NN with this value. 
+      push_value_to_network("W", self.board, self.W/self.N)
 
 
 #recursively selects hghest value child at each level
 def select(node):
    friendly_turn*=-1       #alternates turns going down
    if len(node.children) != 0:
-      #recursively select best child
       max_u = 0
       max_node = None
       for x in range(len(node.children)):
