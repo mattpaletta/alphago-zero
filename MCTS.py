@@ -24,7 +24,7 @@ class Node:
       self.U = self.W*self.friendly_turn/self.N+self.C*self.P*math.sqrt(math.log(self.parent.N)/(1+self.N))
       self.N+=1
       self.parent.W += self.W    
-      push_value_to_network("W", self, self.W/self.N)    #TODO update the W NN with this value. 
+      push_value_to_network("W", self.board, self.W/self.N)    #TODO update the W NN with this value. 
 
 
 #recursively selects hghest value child at each level
