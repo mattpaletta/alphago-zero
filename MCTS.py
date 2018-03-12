@@ -85,4 +85,4 @@ def find_optimal_path(board_layout):
          push_value_to_network("P", root_node.children[x].board, 1)
       else:
          push_value_to_network("P", root_node.children[x].board, 0)
-   return most_explored
+   return most_explored.board
