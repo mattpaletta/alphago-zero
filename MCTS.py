@@ -15,7 +15,10 @@ class Node:
       #will always be between -1 and 1. the value passed back to the network will be divided by N
       #will be either -1 or 1 depending on if its a terminal state
       #naturally from point of view of network. multiply by friendly_turn to get whose turn it is
-      self.W = return_value_from_network() #get W from network     
+      if(determine_if_terminal(board)):
+         self.W = determine_if_terminal(board)
+      else:
+         self.W = return_value_from_network() #get W from network     
       self.N = 0
       self.P = return_value_from_network() #get p from network
       self.C = 1     #exploration constant
@@ -62,6 +65,7 @@ def update(node):
       node.calculateU()
       update(node.parent)
 
+#returns -1 if lost from position, 1 if won
 def determine_if_terminal(board_layout):
    return False
 
