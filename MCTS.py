@@ -17,9 +17,8 @@ class Node:
       #will always be between -1 and 1. the value passed back to the network will be divided by N
       #will be either -1 or 1 depending on if its a terminal state
       #naturally from point of view of network. multiply by friendly_turn to get whose turn it is
-      if(determine_if_terminal(board)):
-         self.W = determine_if_terminal(board)
-      else:
+      self.W = determine_if_terminal(board)
+      if(self.W==0):
          self.W = return_value_from_network()
       self.N = 0     #visit count 
 
@@ -57,7 +56,7 @@ def select(node):
 #creates all possible children from current state
 #if this isnt a terminal board position
 def expand(node, board_layout):
-   if(determine_if_terminal(board_layout) == False):
+   if(determine_if_terminal(board_layout) == 0):
       #for each board reachable by the current board
       possible_outcomes = return_value_from_network() #array of adjacent board positions
       for x in range(len(possible_outcomes)):
@@ -72,7 +71,7 @@ def update(node):
       node.calculateU()
       update(node.parent)
 
-#returns -1 if lost from position, 1 if won
+#returns -1 if lost from position, 1 if won. o otherwise
 def determine_if_terminal(board_layout):
    return False
 
@@ -101,4 +100,4 @@ def find_optimal_path(board_layout):
          push_value_to_network("P", root_node.children[x].board, 1)
       else:
          push_value_to_network("P", root_node.children[x].board, 0)
-   return most_explored.board
+   return most_explored.board    #could return position of next move instead?
