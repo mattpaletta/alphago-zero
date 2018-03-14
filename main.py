@@ -1,11 +1,13 @@
 import logging
 import sys
 
+import dotdict as dotdict
+
 from game import Game
 from nnet import NNet
 from coach import Coach
 
-args = dotdict({
+args = {
     'numIters': 1000,
     'numEps': 100,
     'tempThreshold': 15,
@@ -19,8 +21,7 @@ args = dotdict({
     'load_model': False,
     'load_folder_file': ('/dev/models/8x100x50','best.pth.tar'),
     'numItersForTrainExamplesHistory': 20,
-
-})
+}
 
 
 def setup_logging():
@@ -38,4 +39,4 @@ if __name__ == "__main__":
     logging.info("Learning Go!")
     game = Game(n=18)
     nnet = NNet(action_size=game.getActionSize(), board_size_x=19, board_size_y=19)
-    c = Coach(game, nnet, )
+    c = Coach(game, nnet, args)

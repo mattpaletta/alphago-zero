@@ -17,7 +17,7 @@ class Coach():
         self.nnet = nnet
         self.pnet = self.nnet.__class__(self.game)  # the competitor network
         self.args = args
-        self.mcts = MCTS(self.game, self.nnet, self.args)
+        self.mcts = MCTS(game, nnet, args)
         self.trainExamplesHistory = []    # history of examples from args.numItersForTrainExamplesHistory latest iterations
         self.skipFirstSelfPlay = False # can be overriden in loadTrainExamples()
 
