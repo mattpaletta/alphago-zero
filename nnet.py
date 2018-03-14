@@ -64,6 +64,8 @@ class NNet(object):
                                   action_size=action_size,
                                   value=self.value,
                                   prob=self.prob)
+        summary = tf.summary.FileWriter("logs/")
+        summary.add_graph(graph)
         return graph
 
     def __calculate_loss(self, learning_rate, action_size, value, prob):
