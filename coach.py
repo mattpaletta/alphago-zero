@@ -1,6 +1,8 @@
 import logging
 from collections import deque
 import itertools
+from multiprocessing.pool import Pool
+
 import numpy as np
 import os
 import sys
@@ -35,7 +37,8 @@ class Coach(object):
 	          model_update__win_threshold,
 	          cpuct,
 	          num_mcst_sims,
-	          know_nothing_training_iters):
+	          know_nothing_training_iters,
+	          max_cpus):
 		"""
 		Performs numIters iterations with numEps episodes of self-play in each
 		iteration. After every iteration, it retrains neural network with
@@ -43,8 +46,9 @@ class Coach(object):
 		It then pits the new neural network against the old one and accepts it
 		only if it wins >= updateThreshold fraction of games.
 		"""
-		logging.info("Starting learning loop.")
+		logging.info("Starting learning loop, using: {0} cores.".format(max_cpus))
 		train_examples_history = []
+		pool = Pool(processes=max_cpus)
 		
 		for i in range(self.num_iters):
 			
@@ -60,11 +64,13 @@ class Coach(object):
 				iteration_train_examples = deque([], maxlen=num_training_examples_per_iter)
 				logging.debug("Starting {0} training episodes".format(num_train_episodes))
 				
-				for _ in tqdm(range(num_train_episodes)):
-					# reset search tree
+				def self_play():
 					mcts = MCTS(game=self.game, nnet=self.nnet, cpuct=cpuct, num_mcst_sims=num_mcst_sims)
-					iteration_train_examples += self.execute_episode(mcts,
-					                                                 know_nothing_training_iters=know_nothing_training_iters)
+					return self.execute_episode(mcts,
+					                            know_nothing_training_iters=know_nothing_training_iters)
+				pool.map_async(func=self_play,
+				               iterable=range(num_train_episodes),
+				               callback=lambda x: iteration_train_examples.append(x))
 				
 				# save the iteration examples to the history
 				logging.debug("Storing {0} training examples".format(len(iteration_train_examples)))
@@ -143,7 +149,7 @@ class Coach(object):
 			canonicalBoard = self.game.getCanonicalForm(board, self.curPlayer)
 			temp = int(episodeStep < know_nothing_training_iters)
 			
-			pi = mcst.getActionProb(canonicalBoard, temp=temp)
+			pi = mcst.getActionProb(canonicalBoard, temp=temp, max_cpus=max_cpus)
 			sym = self.game.getSymmetries(canonicalBoard, pi)
 			for b, p in sym:
 				train_examples.append([b, self.curPlayer, p, None])

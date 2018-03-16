@@ -24,10 +24,10 @@ args = {
 
 def setup_logging():
 	root = logging.getLogger()
-	root.setLevel(logging.NOTSET)
+	root.setLevel(logging.INFO)
 	
 	ch = logging.StreamHandler(sys.stdout)
-	ch.setLevel(logging.NOTSET)
+	ch.setLevel(logging.INFO)
 	formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s - [%(filename)s:%(lineno)s]')
 	ch.setFormatter(formatter)
 	root.addHandler(ch)
@@ -53,4 +53,5 @@ if __name__ == "__main__":
 	            model_update__win_threshold = args["updateThreshold"],
 	            num_mcst_sims = args["numMCTSSims"],
 	            cpuct = args["cpuct"],
-	            know_nothing_training_iters= args["tempThreshold"])
+	            know_nothing_training_iters= args["tempThreshold"],
+	            max_cpus=3)
