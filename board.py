@@ -12,7 +12,9 @@ Board data:
 Squares are stored and manipulated as (x,y) tuples.
 x is the column, y is the row.
 '''
-class Board():
+
+
+class Board(object):
     def __init__(self, n):
         "Set up initial board configuration."
         self.n = n
@@ -22,7 +24,7 @@ class Board():
             self.pieces[i] = [0]*self.n
 
     # add [][] indexer syntax to the Board
-    def __getitem__(self, index): 
+    def __getitem__(self, index):
         return self.pieces[index]
 
     def get_legal_moves(self, color):

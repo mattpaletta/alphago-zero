@@ -1,14 +1,11 @@
 import logging
 from collections import deque
-
 import itertools
 import numpy as np
-import time
 import os
 import sys
 from pickle import Pickler, Unpickler
 from random import shuffle
-
 from tqdm import tqdm
 
 from arena import Arena
@@ -21,13 +18,13 @@ class Coach(object):
 	in Game and NeuralNet. args are specified in main.py.
 	"""
 	
-	def __init__(self, game, nnet, num_iters):
+	def __init__(self, game, nnet, pnet, num_iters):
 		self.game = game
 		self.nnet = nnet
-		self.pnet = nnet.__class__(self.game)  # the competitor network
+		self.pnet = pnet  # the competitor network
 		self.num_iters = num_iters
 		# mcts = MCTS(game, nnet)
-		self.doFirstIterSelfPlay = False  # can be overwritten in loadTrainExamples()
+		self.doFirstIterSelfPlay = True  # can be overwritten in loadTrainExamples()
 	
 	def learn(self,
 	          num_train_episodes,
@@ -35,7 +32,10 @@ class Coach(object):
 	          num_training_examples_per_iter,
 	          checkpoint_folder,
 	          arena_model_size,
-	          model_update__win_threshold):
+	          model_update__win_threshold,
+	          cpuct,
+	          num_mcst_sims,
+	          know_nothing_training_iters):
 		"""
 		Performs numIters iterations with numEps episodes of self-play in each
 		iteration. After every iteration, it retrains neural network with
@@ -48,7 +48,7 @@ class Coach(object):
 		
 		for i in range(self.num_iters):
 			
-			logging.info('ITER :' + str(i + 1) + "/" + str(self.num_iters + 1))
+			logging.info('ITER: ' + str(i + 1) + "/" + str(self.num_iters + 1))
 			
 			# Only play against yourself if either args, or if it's the second iteration
 			if self.doFirstIterSelfPlay:
@@ -61,11 +61,13 @@ class Coach(object):
 				logging.debug("Starting {0} training episodes".format(num_train_episodes))
 				
 				for _ in tqdm(range(num_train_episodes)):
-					mcts = MCTS(self.game, self.nnet)  # reset search tree
-					iteration_train_examples += self.execute_episode(mcts)
+					# reset search tree
+					mcts = MCTS(game=self.game, nnet=self.nnet, cpuct=cpuct, num_mcst_sims=num_mcst_sims)
+					iteration_train_examples += self.execute_episode(mcts,
+					                                                 know_nothing_training_iters=know_nothing_training_iters)
 				
 				# save the iteration examples to the history
-				logging.debug("Saving {0} training examples".format(len(iteration_train_examples)))
+				logging.debug("Storing {0} training examples".format(len(iteration_train_examples)))
 				train_examples_history.append(iteration_train_examples)
 			else:
 				logging.debug("Skipped self play.")
@@ -78,31 +80,31 @@ class Coach(object):
 			# backup history to a file
 			# NB! the examples were collected using the model from the previous iteration, so (i-1)
 			logging.debug("Saving model from this iteration.")
-			self.save_training_examples(iteration=i,
+			self.save_training_examples(iteration=i+1,
 			                            checkpoint_folder=checkpoint_folder,
 			                            trainExamplesHistory=train_examples_history)
 			
 			# shuffle examples before training
 			logging.debug("Flattening training examples.")
-			train_examples = list(itertools.chain.from_iterable(train_examples_history))
+			train_examples = np.asarray(train_examples_history).reshape(shape=(-1, 19, 19, 1))
 			shuffle(train_examples)
 			
 			# training new network, keeping a copy of the old one
 			logging.debug("Saving this network, loading it as previous network.")
 			self.nnet.save_checkpoint(folder=checkpoint_folder, filename='temp.pth.tar')
-			#self.pnet.load_checkpoint(folder=checkpoint_folder, filename='temp.pth.tar')
-			self.pnet = self.nnet.deepcopy()
+			self.pnet.load_checkpoint(folder=checkpoint_folder, filename='temp.pth.tar')
 			
-			prior_mcts = MCTS(self.game, self.pnet)
+			prior_mcts = MCTS(self.game, self.pnet, cpuct=cpuct, num_mcst_sims=num_mcst_sims)
 			
 			logging.info("Training new network using shuffled training examples.")
 			self.nnet.train(train_examples)
-			new_mcts = MCTS(self.game, self.nnet)
+			new_mcts = MCTS(self.game, self.nnet, cpuct=cpuct, num_mcst_sims=num_mcst_sims)
 			
 			logging.info("Testing network against previous version.")
-			arena = Arena(lambda x: np.argmax(prior_mcts.getActionProb(x, temp=0)),
-						  lambda x: np.argmax(new_mcts.getActionProb(x, temp=0)),
-						  self.game)
+			player1 = lambda x: np.argmax(prior_mcts.getActionProb(x, temp=0))
+			player2 = lambda x: np.argmax(new_mcts.getActionProb(x, temp=0))
+			
+			arena = Arena(player1, player2, self.game)
 			
 			pwins, nwins, draws = arena.playGames(arena_model_size)
 			
@@ -115,7 +117,7 @@ class Coach(object):
 				self.nnet.save_checkpoint(folder=checkpoint_folder, filename=self.get_examples_checkpoint_file(i))
 				self.nnet.save_checkpoint(folder=checkpoint_folder, filename='best.pth.tar')
 	
-	def execute_episode(self, mcst):
+	def execute_episode(self, mcst, know_nothing_training_iters):
 		"""
 		This function executes one episode of self-play, starting with player 1.
 		As the game is played, each turn is added as a training example to
@@ -139,9 +141,9 @@ class Coach(object):
 		while True:
 			episodeStep += 1
 			canonicalBoard = self.game.getCanonicalForm(board, self.curPlayer)
-			temp = int(episodeStep < self.args.tempThreshold)
+			temp = int(episodeStep < know_nothing_training_iters)
 			
-			pi = self.mcts.getActionProb(canonicalBoard, temp=temp)
+			pi = mcst.getActionProb(canonicalBoard, temp=temp)
 			sym = self.game.getSymmetries(canonicalBoard, pi)
 			for b, p in sym:
 				train_examples.append([b, self.curPlayer, p, None])
