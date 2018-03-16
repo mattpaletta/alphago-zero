@@ -40,6 +40,8 @@ class MCTS(object):
 			probs: a policy vector where the probability of the ith action is
 				   proportional to Nsa[(s,a)]^(1./temp)
 		"""
+		
+		# TODO:// Run these all on separate threads
 		for i in range(self.num_mcst_sims):
 			logging.info("Starting MCST simulation: {0}/{1}:{2}".format(i,
 			                                                            self.num_mcst_sims,
@@ -90,7 +92,11 @@ class MCTS(object):
 		if board_string not in self.Ps:
 			logging.debug("Reached leaf node!")
 			# The neural network only accept boards of (1, 19, 19, 1), so reshape it in numpy.
+			# TODO:// This should be (19, 19, 17)
+			# TODO:// The first 16 are the current board and the last 7 for each player
+			# TODO:// The final one is 1 or -1 indicating who's turn it is.
 			np_canonical_board = np.asarray(canonical_board).reshape(19, 19, 1)
+			# TODO:// Lock search thread before getting value from NN.
 			action_prob, board_value = self.nnet.predict(np_canonical_board)
 			self.Ps[board_string] = action_prob
 			

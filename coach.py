@@ -23,7 +23,6 @@ class Coach(object):
 		self.nnet = nnet
 		self.pnet = pnet  # the competitor network
 		self.num_iters = num_iters
-		# mcts = MCTS(game, nnet)
 		self.doFirstIterSelfPlay = True  # can be overwritten in loadTrainExamples()
 
 
@@ -64,6 +63,7 @@ class Coach(object):
 				logging.debug("Starting {0} training episodes. Running {1} Async".format(num_train_episodes,
 				                                                                         max_cpus))
 				
+				# TODO:// Run these each in parallel.
 				def self_play(game, nnet, i):
 					logging.debug("Starting MCST")
 					mcts = MCTS(game=game, nnet=nnet, cpuct=cpuct, num_mcst_sims=num_mcst_sims)
@@ -86,6 +86,7 @@ class Coach(object):
 						num_training_examples_to_keep))
 				train_examples_history.pop(0)
 			
+			#TODO:// Run this async
 			# backup history to a file
 			# NB! the examples were collected using the model from the previous iteration, so (i-1)
 			logging.debug("Saving model from this iteration.")
@@ -103,12 +104,14 @@ class Coach(object):
 			self.nnet.save_checkpoint(folder=checkpoint_folder, filename='temp.pth.tar')
 			self.pnet.load_checkpoint(folder=checkpoint_folder, filename='temp.pth.tar')
 			
+			# TODO:// Run this async, split into separate function for readability
 			prior_mcts = MCTS(self.game, self.pnet, cpuct=cpuct, num_mcst_sims=num_mcst_sims)
 			
 			logging.info("Training new network using shuffled training examples.")
 			self.nnet.train(train_examples)
 			new_mcts = MCTS(self.game, self.nnet, cpuct=cpuct, num_mcst_sims=num_mcst_sims)
 			
+			# TODO:// Run this async, split into separate function.
 			logging.info("Testing network against previous version.")
 			player1 = lambda x: np.argmax(prior_mcts.getActionProb(x, temp=0))
 			player2 = lambda x: np.argmax(new_mcts.getActionProb(x, temp=0))
@@ -147,6 +150,7 @@ class Coach(object):
 		self.curPlayer = 1
 		episodeStep = 0
 		
+		# TODO:// Add comments...
 		while True:
 			episodeStep += 1
 			canonicalBoard = self.game.getCanonicalForm(board, self.curPlayer)
@@ -191,11 +195,10 @@ class Coach(object):
 			if r != "y":
 				sys.exit()
 		else:
-			train_examples_history = []
 			print("File with trainExamples found. Read it.")
 			with open(examplesFile, "rb") as f:
 				train_examples_history = Unpickler(f).load()
 			# examples based on the model were already collected (loaded)
 			self.doFirstIterSelfPlay = True
-		
-		return train_examples_history
+
+			return train_examples_history
