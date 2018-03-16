@@ -39,6 +39,7 @@ class MCTS(object):
 				   proportional to Nsa[(s,a)]^(1./temp)
 		"""
 		for i in range(self.num_mcst_sims):
+			logging.info("Starting MCST simulation: {0}/{1}".format(i, self.num_mcst_sims))
 			self.search(canonicalBoard)
 		
 		s = self.game.stringRepresentation(canonicalBoard)
