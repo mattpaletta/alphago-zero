@@ -104,7 +104,6 @@ class Coach(object):
 			self.nnet.save_checkpoint(folder=checkpoint_folder, filename='temp.pth.tar')
 			self.pnet.load_checkpoint(folder=checkpoint_folder, filename='temp.pth.tar')
 			
-			# TODO:// Run this async, split into separate function for readability
 			prior_mcts = MCTS(self.game, self.pnet, cpuct=cpuct, num_mcst_sims=num_mcst_sims)
 			
 			logging.info("Training new network using shuffled training examples.")

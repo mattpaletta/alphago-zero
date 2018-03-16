@@ -74,6 +74,8 @@ class Arena(object):
         oneWon = 0
         twoWon = 0
         draws = 0
+        
+        # TODO:// These can all be async.
         for _ in range(num):
             gameResult = self.playGame(verbose=verbose)
             if gameResult == 1:
@@ -87,6 +89,7 @@ class Arena(object):
 
         self.player1, self.player2 = self.player2, self.player1
         
+        # TODO:// So can this...
         for _ in range(num):
             gameResult = self.playGame(verbose=verbose)
             if gameResult == -1:
