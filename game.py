@@ -1,3 +1,8 @@
+import numpy as np
+
+from board import Board
+
+
 class Game(object):
     def __init__(self, n=15, nir=5):
         self.n = n

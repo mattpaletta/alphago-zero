@@ -8,10 +8,9 @@ class MCTS(object):
 	#keeps track of whose turn it is
 	friendly_turn = -1
 
-	def __init__(self, game, nnet, args):
+	def __init__(self, game, nnet):
 		self.game = game
 		self.nnet = nnet
-		self.args = args
 
 	# recursively selects hghest value child at each level
 	def select(self, node):
