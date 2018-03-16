@@ -24,10 +24,10 @@ args = {
 
 def setup_logging():
 	root = logging.getLogger()
-	root.setLevel(logging.INFO)
+	root.setLevel(logging.DEBUG)
 	
 	ch = logging.StreamHandler(sys.stdout)
-	ch.setLevel(logging.INFO)
+	ch.setLevel(logging.DEBUG)
 	formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s - [%(filename)s:%(lineno)s]')
 	ch.setFormatter(formatter)
 	root.addHandler(ch)

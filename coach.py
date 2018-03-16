@@ -1,14 +1,12 @@
 import logging
 from collections import deque
-import itertools
+import functools
 from multiprocessing.pool import Pool
-
 import numpy as np
 import os
 import sys
 from pickle import Pickler, Unpickler
 from random import shuffle
-from tqdm import tqdm
 
 from arena import Arena
 from MCTS import MCTS
@@ -27,7 +25,8 @@ class Coach(object):
 		self.num_iters = num_iters
 		# mcts = MCTS(game, nnet)
 		self.doFirstIterSelfPlay = True  # can be overwritten in loadTrainExamples()
-	
+
+
 	def learn(self,
 	          num_train_episodes,
 	          num_training_examples_to_keep,
@@ -62,15 +61,19 @@ class Coach(object):
 			
 			if self.doFirstIterSelfPlay or i > 0:
 				iteration_train_examples = deque([], maxlen=num_training_examples_per_iter)
-				logging.debug("Starting {0} training episodes".format(num_train_episodes))
+				logging.debug("Starting {0} training episodes. Running {1} Async".format(num_train_episodes,
+				                                                                         max_cpus))
 				
-				def self_play():
-					mcts = MCTS(game=self.game, nnet=self.nnet, cpuct=cpuct, num_mcst_sims=num_mcst_sims)
-					return self.execute_episode(mcts,
-					                            know_nothing_training_iters=know_nothing_training_iters)
-				pool.map_async(func=self_play,
-				               iterable=range(num_train_episodes),
-				               callback=lambda x: iteration_train_examples.append(x))
+				def self_play(game, nnet, i):
+					logging.debug("Starting MCST")
+					mcts = MCTS(game=game, nnet=nnet, cpuct=cpuct, num_mcst_sims=num_mcst_sims)
+					x = self.execute_episode(mcts,
+					                         know_nothing_training_iters=know_nothing_training_iters,
+					                         current_self_play_iteration=i)
+					iteration_train_examples.append(x)
+					
+				list(map(functools.partial(self_play, self.game, self.nnet), range(num_train_episodes)))
+				# callback=lambda x: iteration_train_examples.append(x))
 				
 				# save the iteration examples to the history
 				logging.debug("Storing {0} training examples".format(len(iteration_train_examples)))
@@ -92,7 +95,7 @@ class Coach(object):
 			
 			# shuffle examples before training
 			logging.debug("Flattening training examples.")
-			train_examples = np.asarray(train_examples_history).reshape(shape=(-1, 19, 19, 1))
+			train_examples = np.asarray(train_examples_history).reshape((len(train_examples_history), 19, 19, 1))
 			shuffle(train_examples)
 			
 			# training new network, keeping a copy of the old one
@@ -123,7 +126,7 @@ class Coach(object):
 				self.nnet.save_checkpoint(folder=checkpoint_folder, filename=self.get_examples_checkpoint_file(i))
 				self.nnet.save_checkpoint(folder=checkpoint_folder, filename='best.pth.tar')
 	
-	def execute_episode(self, mcst, know_nothing_training_iters):
+	def execute_episode(self, mcst, know_nothing_training_iters, current_self_play_iteration=0):
 		"""
 		This function executes one episode of self-play, starting with player 1.
 		As the game is played, each turn is added as a training example to
@@ -149,7 +152,9 @@ class Coach(object):
 			canonicalBoard = self.game.getCanonicalForm(board, self.curPlayer)
 			temp = int(episodeStep < know_nothing_training_iters)
 			
-			pi = mcst.getActionProb(canonicalBoard, temp=temp, max_cpus=max_cpus)
+			pi = mcst.getActionProb(canonicalBoard,
+			                        temp=temp,
+			                        current_self_play_iteration=current_self_play_iteration)
 			sym = self.game.getSymmetries(canonicalBoard, pi)
 			for b, p in sym:
 				train_examples.append([b, self.curPlayer, p, None])

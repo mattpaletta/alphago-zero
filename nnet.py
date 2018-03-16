@@ -26,9 +26,9 @@ class NNet(object):
 		                                num_channels=num_channels,
 		                                action_size=action_size)
 		
-		self.sess = tf.Session(graph=self.graph)
+		self.sess = tf.Session(graph=self.graph, config=tf.ConfigProto(log_device_placement=True))
 		self.saver = None
-		with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as temp_sess:
+		with tf.Session() as temp_sess:
 			temp_sess.run(tf.global_variables_initializer())
 		self.sess.run(tf.variables_initializer(self.graph.get_collection('variables')))
 	

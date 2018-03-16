@@ -32,7 +32,7 @@ class MCTS(object):
 		self.num_every_move_valid = 0
 		self.cpuct = cpuct
 		
-	def getActionProb(self, canonicalBoard, temp=1):
+	def getActionProb(self, canonicalBoard, temp=1, current_self_play_iteration=0):
 		"""
 		This function performs numMCTSSims simulations of MCTS starting from
 		canonicalBoard.
@@ -41,7 +41,9 @@ class MCTS(object):
 				   proportional to Nsa[(s,a)]^(1./temp)
 		"""
 		for i in range(self.num_mcst_sims):
-			logging.info("Starting MCST simulation: {0}/{1}".format(i, self.num_mcst_sims))
+			logging.info("Starting MCST simulation: {0}/{1}:{2}".format(i,
+			                                                            self.num_mcst_sims,
+			                                                            current_self_play_iteration))
 			self.search(canonicalBoard)
 		
 		s = self.game.stringRepresentation(canonicalBoard)
