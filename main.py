@@ -12,7 +12,7 @@ args = {
 	'numEps': 100,
 	'tempThreshold': 15,
 	'updateThreshold': 0.6,
-	'maxlenOfQueue': 200000,
+	'maxlenOfQueue': 200,
 	'numMCTSSims': 25,
 	'arenaCompare': 40,
 	'cpuct': 1,
@@ -56,4 +56,4 @@ if __name__ == "__main__":
 	            num_mcst_sims=args["numMCTSSims"],
 	            cpuct=args["cpuct"],
 	            know_nothing_training_iters=args["tempThreshold"],
-	            max_cpus=2)
+	            max_cpus=4)

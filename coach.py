@@ -98,7 +98,7 @@ class Coach(object):
 			train_examples = np.asarray(train_examples_history).reshape((len(train_examples_history), 19, 19, 1))
 			shuffle(train_examples)
 			
-			# training new network, keeping a copy of the old one
+			#training new network, keeping a copy of the old one
 			logging.debug("Saving this network, loading it as previous network.")
 			self.nnet.save_checkpoint(folder=checkpoint_folder, filename='temp.pth.tar')
 			self.pnet.load_checkpoint(folder=checkpoint_folder, filename='temp.pth.tar')
