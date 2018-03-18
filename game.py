@@ -99,6 +99,7 @@ class Game(object):
 
 
 def display(board):
+    return
     n = board.shape[0]
 
     for y in range(n):

@@ -1,7 +1,7 @@
 import logging
 from collections import deque
 import functools
-from multiprocessing.pool import Pool
+from multiprocess.dummy import Pool
 import numpy as np
 import os
 import sys
@@ -24,7 +24,6 @@ class Coach(object):
 		self.pnet = pnet  # the competitor network
 		self.num_iters = num_iters
 		self.doFirstIterSelfPlay = True  # can be overwritten in loadTrainExamples()
-
 
 	def learn(self,
 	          num_train_episodes,
@@ -62,19 +61,19 @@ class Coach(object):
 				iteration_train_examples = deque([], maxlen=num_training_examples_per_iter)
 				logging.debug("Starting {0} training episodes. Running {1} Async".format(num_train_episodes,
 				                                                                         max_cpus))
-				
+
 				# TODO:// Run these each in parallel.
 				def self_play(game, nnet, i):
-					logging.debug("Starting MCST")
+					#logging.debug("Starting MCST")
 					mcts = MCTS(game=game, nnet=nnet, cpuct=cpuct, num_mcst_sims=num_mcst_sims)
 					x = self.execute_episode(mcts,
-					                         know_nothing_training_iters=know_nothing_training_iters,
-					                         current_self_play_iteration=i)
-					iteration_train_examples.append(x)
-					
-				list(map(functools.partial(self_play, self.game, self.nnet), range(num_train_episodes)))
-				# callback=lambda x: iteration_train_examples.append(x))
-				
+											 know_nothing_training_iters=know_nothing_training_iters,
+											 current_self_play_iteration=i)
+
+					return x
+
+				iteration_train_examples = pool.map(functools.partial(self_play, self.game, self.nnet), range(num_train_episodes))
+
 				# save the iteration examples to the history
 				logging.debug("Storing {0} training examples".format(len(iteration_train_examples)))
 				train_examples_history.append(iteration_train_examples)
@@ -118,7 +117,7 @@ class Coach(object):
 			arena = Arena(player1, player2, self.game)
 			
 			pwins, nwins, draws = arena.playGames(arena_model_size)
-			
+
 			print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
 			if pwins + nwins > 0 and float(nwins) / (pwins + nwins) < model_update__win_threshold:
 				print('REJECTING NEW MODEL')
@@ -127,7 +126,7 @@ class Coach(object):
 				print('ACCEPTING NEW MODEL')
 				self.nnet.save_checkpoint(folder=checkpoint_folder, filename=self.get_examples_checkpoint_file(i))
 				self.nnet.save_checkpoint(folder=checkpoint_folder, filename='best.pth.tar')
-	
+
 	def execute_episode(self, mcst, know_nothing_training_iters, current_self_play_iteration=0):
 		"""
 		This function executes one episode of self-play, starting with player 1.

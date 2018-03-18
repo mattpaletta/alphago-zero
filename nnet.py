@@ -30,6 +30,7 @@ class NNet(object):
 		self.saver = None
 		with tf.Session() as temp_sess:
 			temp_sess.run(tf.global_variables_initializer())
+		#self.sess.run(tf.global_variables_initializer())
 		self.sess.run(tf.variables_initializer(self.graph.get_collection('variables')))
 	
 	def __build_model(self, board_size_x,
@@ -59,8 +60,8 @@ class NNet(object):
 					training=self.isTraining))  # batch_size  x (board_x-4) x (board_y-4) x num_channels
 			h_conv4_flat = tf.reshape(h_conv4, [-1, num_channels * (board_size_x - 4) * (board_size_y - 4)])
 			
-			logging.warning("Add dropout layers back in!")
-			"""
+			#logging.warning("Add dropout layers back in!")
+
 			s_fc1 = tf.layers.dropout(
 					inputs=tf.nn.relu(
 							tf.layers.batch_normalization(tf.layers.dense(h_conv4_flat, 1024), axis=1, training=self.isTraining)
@@ -70,8 +71,8 @@ class NNet(object):
 					inputs=tf.nn.relu(
 							tf.layers.batch_normalization(tf.layers.dense(s_fc1, 512), axis=1, training=self.isTraining)),
 					rate=self.dropout)  # batch_size x 512
-			"""
-			s_fc2 = h_conv4_flat
+
+			#s_fc2 = h_conv4_flat
 			pi = tf.layers.dense(s_fc2, action_size)  # batch_size x self.action_size
 			self.prob = tf.nn.softmax(pi)
 			self.value = tf.nn.tanh(tf.layers.dense(s_fc2, 1))  # batch_size x 1

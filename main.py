@@ -56,4 +56,4 @@ if __name__ == "__main__":
 	            num_mcst_sims=args["numMCTSSims"],
 	            cpuct=args["cpuct"],
 	            know_nothing_training_iters=args["tempThreshold"],
-	            max_cpus=3)
+	            max_cpus=2)
