@@ -25,8 +25,12 @@ class NNet(object):
 		                                learning_rate=learning_rate,
 		                                num_channels=num_channels,
 		                                action_size=action_size)
-		
-		self.sess = tf.Session(graph=self.graph, config=tf.ConfigProto(log_device_placement=True))
+
+		config = tf.ConfigProto(log_device_placement=True)
+		config.gpu_options.allocator_type = 'BFC'
+		config.gpu_options.per_process_gpu_memory_fraction = 0.4
+		config.gpu_options.allow_growth = True
+		self.sess = tf.Session(graph=self.graph, config=config)
 		self.saver = None
 		with tf.Session() as temp_sess:
 			temp_sess.run(tf.global_variables_initializer())
