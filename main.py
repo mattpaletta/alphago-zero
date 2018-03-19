@@ -8,12 +8,12 @@ from coach import Coach
 # TODO:// These are much lower params than the paper describes.
 # TODO:// Turn these into command line arguments with defaults.
 args = {
-	'num_iters': 1000,
-	'numEps': 100,
+	'num_iters': 5,
+	'numEps': 25,
 	'tempThreshold': 15,
 	'updateThreshold': 0.6,
-	'maxlenOfQueue': 200000,
-	'numMCTSSims': 25,
+	'maxlenOfQueue': 10,
+	'numMCTSSims': 5,
 	'arenaCompare': 40,
 	'cpuct': 1,
 	
@@ -26,10 +26,10 @@ args = {
 
 def setup_logging():
 	root = logging.getLogger()
-	root.setLevel(logging.DEBUG)
+	root.setLevel(logging.INFO)
 	
 	ch = logging.StreamHandler(sys.stdout)
-	ch.setLevel(logging.DEBUG)
+	ch.setLevel(logging.INFO)
 	formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s - [%(filename)s:%(lineno)s]')
 	ch.setFormatter(formatter)
 	root.addHandler(ch)
@@ -56,4 +56,4 @@ if __name__ == "__main__":
 	            num_mcst_sims=args["numMCTSSims"],
 	            cpuct=args["cpuct"],
 	            know_nothing_training_iters=args["tempThreshold"],
-	            max_cpus=2)
+	            max_cpus=4)

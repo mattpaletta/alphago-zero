@@ -57,7 +57,7 @@ class Arena(object):
         return self.game.getGameEnded(board, 1)
 
 
-    def playGames(self, num, verbose=False):
+    def playGames(self, num, pool, verbose=False):
         """
         Plays num games in which player1 starts num/2 games and player2 starts
         num/2 games.
@@ -76,7 +76,8 @@ class Arena(object):
         draws = 0
         
         # TODO:// These can all be async.
-        for _ in range(num):
+        #for _ in range(num):
+        def run_arena(i):
             gameResult = self.playGame(verbose=verbose)
             if gameResult == 1:
                 oneWon += 1
@@ -87,10 +88,13 @@ class Arena(object):
             # bookkeeping + plot progress
             eps += 1
 
+        results = pool.map(run_arena, range(num))
+
         self.player1, self.player2 = self.player2, self.player1
         
         # TODO:// So can this...
-        for _ in range(num):
+        #for _ in range(num):
+        def run_arena2(i):
             gameResult = self.playGame(verbose=verbose)
             if gameResult == -1:
                 oneWon += 1
@@ -100,5 +104,7 @@ class Arena(object):
                 draws += 1
             # bookkeeping + plot progress
             eps += 1
+	
+        results = pool.map(run_arena2, range(num))	
 
         return oneWon, twoWon, draws

@@ -76,11 +76,11 @@ class Coach(object):
 
 				# save the iteration examples to the history
 				logging.debug("Storing {0} training examples".format(len(iteration_train_examples)))
-				train_examples_history.append(iteration_train_examples)
+				train_examples_history.extend(iteration_train_examples)
 			else:
 				logging.debug("Skipped self play.")
 			
-			if len(train_examples_history) > num_training_examples_to_keep:
+			while len(train_examples_history) > num_training_examples_to_keep:
 				logging.debug("Training examples history limit exceeded ({0}).  Removing oldest example.".format(
 						num_training_examples_to_keep))
 				train_examples_history.pop(0)
@@ -95,10 +95,12 @@ class Coach(object):
 			
 			# shuffle examples before training
 			logging.debug("Flattening training examples.")
-			train_examples = np.asarray(train_examples_history).reshape((len(train_examples_history), 19, 19, 1))
+			num_train_examples = len(train_examples_history)
+			print(num_train_examples)
+			train_examples = np.asarray(train_examples_history).reshape((num_train_examples, 19, 19, 1))
 			shuffle(train_examples)
 			
-			# training new network, keeping a copy of the old one
+			#training new network, keeping a copy of the old one
 			logging.debug("Saving this network, loading it as previous network.")
 			self.nnet.save_checkpoint(folder=checkpoint_folder, filename='temp.pth.tar')
 			self.pnet.load_checkpoint(folder=checkpoint_folder, filename='temp.pth.tar')
@@ -116,7 +118,7 @@ class Coach(object):
 			
 			arena = Arena(player1, player2, self.game)
 			
-			pwins, nwins, draws = arena.playGames(arena_model_size)
+			pwins, nwins, draws = arena.playGames(arena_model_size, pool)
 
 			print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
 			if pwins + nwins > 0 and float(nwins) / (pwins + nwins) < model_update__win_threshold:

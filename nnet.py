@@ -11,8 +11,8 @@ class NNet(object):
 	             learning_rate=0.001,
 	             dropout_rate=0.3,
 	             epochs=10,
-	             batch_size=64,
-	             num_channels=512):
+	             batch_size=32,
+	             num_channels=256): # set batch_size=64, num_channels=512
 		self.BOARD_SIZE_X = board_size_x
 		self.BOARD_SIZE_Y = board_size_y
 		self.action_size = action_size
@@ -28,7 +28,7 @@ class NNet(object):
 
 		config = tf.ConfigProto(log_device_placement=True)
 		config.gpu_options.allocator_type = 'BFC'
-		config.gpu_options.per_process_gpu_memory_fraction = 0.4
+		#config.gpu_options.per_process_gpu_memory_fraction = 0.4
 		config.gpu_options.allow_growth = True
 		self.sess = tf.Session(graph=self.graph, config=config)
 		self.saver = None
