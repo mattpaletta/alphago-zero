@@ -8,8 +8,8 @@ from coach import Coach
 # TODO:// These are much lower params than the paper describes.
 # TODO:// Turn these into command line arguments with defaults.
 args = {
-	'num_iters': 5,
-	'numEps': 25,
+	'num_iters': 3,
+	'numEps': 2,
 	'tempThreshold': 15,
 	'updateThreshold': 0.6,
 	'maxlenOfQueue': 10,

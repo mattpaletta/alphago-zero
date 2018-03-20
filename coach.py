@@ -1,6 +1,9 @@
 import logging
+import threading
 from collections import deque
 import functools
+
+import itertools
 from multiprocess.dummy import Pool
 import numpy as np
 import os
@@ -58,13 +61,13 @@ class Coach(object):
 				logging.debug("Skipping first iteration self play from configs.")
 			
 			if self.doFirstIterSelfPlay or i > 0:
-				iteration_train_examples = deque([], maxlen=num_training_examples_per_iter)
+				# iteration_train_examples = deque([], maxlen=num_training_examples_per_iter)
 				logging.debug("Starting {0} training episodes. Running {1} Async".format(num_train_episodes,
 				                                                                         max_cpus))
 
-				# TODO:// Run these each in parallel.
+				
 				def self_play(game, nnet, i):
-					#logging.debug("Starting MCST")
+					# logging.debug("Starting MCST")
 					mcts = MCTS(game=game, nnet=nnet, cpuct=cpuct, num_mcst_sims=num_mcst_sims)
 					x = self.execute_episode(mcts,
 											 know_nothing_training_iters=know_nothing_training_iters,
@@ -85,20 +88,27 @@ class Coach(object):
 						num_training_examples_to_keep))
 				train_examples_history.pop(0)
 			
-			#TODO:// Run this async
-			# backup history to a file
-			# NB! the examples were collected using the model from the previous iteration, so (i-1)
-			logging.debug("Saving model from this iteration.")
-			self.save_training_examples(iteration=i+1,
-			                            checkpoint_folder=checkpoint_folder,
-			                            trainExamplesHistory=train_examples_history)
+			
+			def save_training_examples():
+				# backup history to a file
+				# NB! the examples were collected using the model from the previous iteration, so (i-1)
+				logging.debug("Saving model from this iteration.")
+				self.save_training_examples(iteration=i+1,
+			                                checkpoint_folder=checkpoint_folder,
+			                                trainExamplesHistory=train_examples_history)
+			
+			save_training_examples_thread = threading.Thread(target=save_training_examples())
+			save_training_examples_thread.start()
 			
 			# shuffle examples before training
 			logging.debug("Flattening training examples.")
 			num_train_examples = len(train_examples_history)
 			print(num_train_examples)
-			train_examples = np.asarray(train_examples_history).reshape((num_train_examples, 19, 19, 1))
+			train_examples = np.asarray(list(itertools.chain(*train_examples_history)))
+			#train_examples = np.asarray(train_examples_history).reshape((num_train_examples, 19, 19, 1))
 			shuffle(train_examples)
+			
+			
 			
 			#training new network, keeping a copy of the old one
 			logging.debug("Saving this network, loading it as previous network.")
@@ -119,7 +129,8 @@ class Coach(object):
 			arena = Arena(player1, player2, self.game)
 			
 			pwins, nwins, draws = arena.playGames(arena_model_size, pool)
-
+			save_training_examples_thread.join()
+			
 			print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
 			if pwins + nwins > 0 and float(nwins) / (pwins + nwins) < model_update__win_threshold:
 				print('REJECTING NEW MODEL')

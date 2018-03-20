@@ -106,11 +106,15 @@ class NNet(object):
 				sample_ids = np.random.randint(len(examples), size=self.batch_size)
 				boards, pis, vs = list(zip(*[examples[i] for i in sample_ids]))
 				
+				# Reshape so tensorflow is happy.
+				num_boards = len(boards)
+				boards = np.asarray(list(boards)).reshape((num_boards, 19, 19, 1))
+				
 				# predict and compute gradient and do SDG step
 				input_dict = {
 					self.input_boards: boards,
-					self.target_pis:   pis,
-					self.target_vs:    vs,
+					self.target_pis:   list(pis),
+					self.target_vs:    list(vs),
 					self.isTraining:   True,
 					self.dropout:      self.dropout_rate
 				}
@@ -123,7 +127,7 @@ class NNet(object):
 						},
 						feed_dict=input_dict
 				)
-				logging.debug("({0}/{1}:{2} PI:{3:03f} V: {4:03f}".format(batch_idx,
+				logging.info("({0}/{1}:{2} PI:{3:03f} V: {4:03f}".format(batch_idx,
 				                                                          num_batches,
 				                                                          epoch,
 				                                                          res["loss_pi"],
