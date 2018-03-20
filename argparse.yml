@@ -42,7 +42,6 @@ Train:
   num_iters:
     help: "How many training iterations to perform"
     default: 3
-    
   num_episodes:
     help: "How many episodes to run per training interation."
     default: 2

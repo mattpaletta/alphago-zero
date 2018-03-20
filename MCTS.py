@@ -124,8 +124,11 @@ class MCTS(object):
 			self.Vs[board_string] = valids
 			self.Ns[board_string] = 0
 			return -board_value
+		try:
+			valids = self.Vs[board_string]
+		except KeyError:
+			return 0
 		
-		valids = self.Vs[board_string]
 		cur_best = -float('inf')
 		best_act = -1
 		
