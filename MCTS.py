@@ -30,7 +30,7 @@ class MCTS(object):
 		self.Es = {}  # stores game.getGameEnded ended for board s
 		self.Vs = {}  # stores game.getValidMoves for board s
 		self.num_every_move_valid = 0
-		self.cpuct = cpuct
+		self.c_puct = cpuct
 		
 	def getActionProb(self, canonicalBoard, temp=1, current_self_play_iteration=0):
 		"""
@@ -136,10 +136,10 @@ class MCTS(object):
 		for a in range(self.game.getActionSize()):
 			if valids[a]:
 				if (board_string, a) in self.Qsa:
-					u = self.Qsa[(board_string, a)] + self.cpuct * self.Ps[board_string][a] * math.sqrt(self.Ns[board_string]) / (
+					u = self.Qsa[(board_string, a)] + self.c_puct * self.Ps[board_string][a] * math.sqrt(self.Ns[board_string]) / (
 								1 + self.Nsa[(board_string, a)])
 				else:
-					u = self.cpuct * self.Ps[board_string][a] * math.sqrt(self.Ns[board_string] + EPS)  # Q = 0 ?
+					u = self.c_puct * self.Ps[board_string][a] * math.sqrt(self.Ns[board_string] + EPS)  # Q = 0 ?
 				
 				if u > cur_best:
 					cur_best = u

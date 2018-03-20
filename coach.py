@@ -31,7 +31,6 @@ class Coach(object):
 	def learn(self,
 	          num_train_episodes,
 	          num_training_examples_to_keep,
-	          num_training_examples_per_iter,
 	          checkpoint_folder,
 	          arena_tournament_size,
 	          model_update__win_threshold,
@@ -88,7 +87,6 @@ class Coach(object):
 						num_training_examples_to_keep))
 				train_examples_history.pop(0)
 			
-			
 			def save_training_examples():
 				# backup history to a file
 				# NB! the examples were collected using the model from the previous iteration, so (i-1)
@@ -102,15 +100,11 @@ class Coach(object):
 			
 			# shuffle examples before training
 			logging.debug("Flattening training examples.")
-			num_train_examples = len(train_examples_history)
-			print(num_train_examples)
 			train_examples = np.asarray(list(itertools.chain(*train_examples_history)))
-			#train_examples = np.asarray(train_examples_history).reshape((num_train_examples, 19, 19, 1))
+			logging.info("Shuffling {0} training examples: ".format(len(train_examples)))
 			shuffle(train_examples)
 			
-			
-			
-			#training new network, keeping a copy of the old one
+			# training new network, keeping a copy of the old one
 			logging.debug("Saving this network, loading it as previous network.")
 			self.nnet.save_checkpoint(folder=checkpoint_folder, filename='temp.pth.tar')
 			self.pnet.load_checkpoint(folder=checkpoint_folder, filename='temp.pth.tar')

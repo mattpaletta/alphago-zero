@@ -1,10 +1,34 @@
 MCTS:
   tempThreshold:
     default: 15
-  numMCTSSims:
+    help: "Temperature threshold.  From paper, helps with network cold start."
+
+  num_mcts_sims:
     default: 5
+    help: "How many Monte Carlo Tree Simulations to perform per action (at training time)"
+
+  c_puct:
+    default: 1
 
 NNET:
+  log_device_placement:
+    default: False
+
+  dropout_rate:
+    default: 0.3
+
+  batch_size:
+    default: 32
+
+  num_channels:
+    default: 256
+
+  learning_rate:
+    default: 0.001
+
+  num_epochs:
+    default: 10
+
   checkpoint_dir:
     default: './checkpoints/'
 
@@ -18,8 +42,8 @@ Train:
   num_iters:
     help: "How many training iterations to perform"
     default: 3
-
-  num_epsisodes:
+    
+  num_episodes:
     help: "How many episodes to run per training interation."
     default: 2
 
@@ -33,10 +57,9 @@ Arena:
     default: 0.6
 
 Other:
-  maxlenOfQueue':
+  maxlenOfQueue:
     default: 10
-  c_puct':
-    default: 1
+
   numItersForTrainExamplesHistory:
     default: 20
 

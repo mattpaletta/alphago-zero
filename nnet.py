@@ -5,28 +5,29 @@ import numpy as np
 
 
 class NNet(object):
-	def __init__(self, board_size_x,
-	             board_size_y,
+	def __init__(self,
+	             board_size,
 	             action_size,
 	             learning_rate=0.001,
 	             dropout_rate=0.3,
 	             epochs=10,
 	             batch_size=32,
-	             num_channels=256): # set batch_size=64, num_channels=512
-		self.BOARD_SIZE_X = board_size_x
-		self.BOARD_SIZE_Y = board_size_y
+	             num_channels=256,
+	             log_device_placement=False): # TODO:// set batch_size=64, num_channels=512
+		self.BOARD_SIZE_X = board_size
+		self.BOARD_SIZE_Y = board_size
 		self.action_size = action_size
 		self.num_epochs = epochs
 		self.batch_size = batch_size
 		self.dropout_rate = dropout_rate
 		
-		self.graph = self.__build_model(board_size_x,
-		                                board_size_y,
+		self.graph = self.__build_model(board_size,
+		                                board_size,
 		                                learning_rate=learning_rate,
 		                                num_channels=num_channels,
 		                                action_size=action_size)
 
-		config = tf.ConfigProto(log_device_placement=True)
+		config = tf.ConfigProto(log_device_placement=log_device_placement)
 		config.gpu_options.allocator_type = 'BFC'
 		#config.gpu_options.per_process_gpu_memory_fraction = 0.4
 		config.gpu_options.allow_growth = True
@@ -64,8 +65,6 @@ class NNet(object):
 					training=self.isTraining))  # batch_size  x (board_x-4) x (board_y-4) x num_channels
 			h_conv4_flat = tf.reshape(h_conv4, [-1, num_channels * (board_size_x - 4) * (board_size_y - 4)])
 			
-			#logging.warning("Add dropout layers back in!")
-
 			s_fc1 = tf.layers.dropout(
 					inputs=tf.nn.relu(
 							tf.layers.batch_normalization(tf.layers.dense(h_conv4_flat, 1024), axis=1, training=self.isTraining)
@@ -76,7 +75,6 @@ class NNet(object):
 							tf.layers.batch_normalization(tf.layers.dense(s_fc1, 512), axis=1, training=self.isTraining)),
 					rate=self.dropout)  # batch_size x 512
 
-			#s_fc2 = h_conv4_flat
 			pi = tf.layers.dense(s_fc2, action_size)  # batch_size x self.action_size
 			self.prob = tf.nn.softmax(pi)
 			self.value = tf.nn.tanh(tf.layers.dense(s_fc2, 1))  # batch_size x 1
@@ -127,22 +125,28 @@ class NNet(object):
 						},
 						feed_dict=input_dict
 				)
-				logging.info("({0}/{1}:{2} PI:{3:03f} V: {4:03f}".format(batch_idx,
-				                                                          num_batches,
-				                                                          epoch,
-				                                                          res["loss_pi"],
-				                                                          res["loss_v"]))
+				logging.info("({0}/{1}:{2}/{3}) PI: {4:03f} V: {5:03f}".format(batch_idx,
+				                                                             num_batches,
+				                                                             epoch,
+				                                                             self.num_epochs,
+				                                                             res["loss_pi"],
+				                                                             res["loss_v"]))
 	
 	def predict(self, board):
 		# preparing input
 		board = board[np.newaxis, :, :]
-		res = self.sess.run(fetches={"prob":  self.prob,
-		                             "value": self.value},
-		                    feed_dict={
-			                    self.input_boards: board,
-			                    self.dropout:      0,
-			                    self.isTraining:   False
-		                    })
+		res = self.sess.run(
+			fetches={
+				"prob":  self.prob,
+				"value": self.value
+			},
+			feed_dict={
+				self.input_boards:  board,
+				self.dropout:       0,
+				self.isTraining:    False
+			}
+		)
+		
 		prob = res["prob"]
 		v = res["value"]
 		return prob[0], v[0]

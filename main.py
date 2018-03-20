@@ -26,25 +26,43 @@ if __name__ == "__main__":
 	
 	configs = Config().get_args()
 	
-	board_size = configs["board_size"]
+	board_size = configs.board_size
 
-	num_threads = (cpu_count()-1) if configs["num_threads"] == 0 else int(configs["num_threads"])
+	num_threads = (cpu_count()-1) if configs.num_threads == 0 else int(configs.num_threads)
 
 	game = Game(n=board_size)
-	nnet = NNet(action_size=game.getActionSize(), board_size_x=board_size, board_size_y=board_size)
-	pnet = NNet(action_size=game.getActionSize(), board_size_x=board_size, board_size_y=board_size)
-	coach = Coach(game=game, nnet=nnet, pnet=pnet, num_iters=args["num_iters"])
-	if configs["load_model"]:
+	nnet = NNet(action_size=game.getActionSize(),
+	            board_size=board_size,
+	            learning_rate=configs.learning_rate,
+	            dropout_rate=configs.dropout_rate,
+	            epochs=configs.num_epochs,
+				batch_size=configs.batch_size,
+	            num_channels=configs.num_channels,
+	            log_device_placement=configs.log_device_placement)
+	
+	pnet = NNet(action_size=game.getActionSize(),
+	            board_size=board_size,
+	            learning_rate=configs.learning_rate,
+	            dropout_rate=configs.dropout_rate,
+	            epochs=configs.num_epochs,
+				batch_size=configs.batch_size,
+	            num_channels=configs.num_channels,
+	            log_device_placement=configs.log_device_placement)
+	
+	coach = Coach(game=game,
+	              nnet=nnet,
+	              pnet=pnet,
+	              num_iters=configs.num_iters)
+	if configs.load_model:
 		logging.info("Loading training examples")
 		coach.loadTrainExamples()
 	
-	coach.learn(num_train_episodes=configs["num_epsisodes"],
-	            num_training_examples_to_keep=configs["maxlenOfQueue"],
-	            num_training_examples_per_iter=configs["num_iters"],
-	            checkpoint_folder=configs["checkpoint_dir"],
-	            arena_tournament_size=configs["arena_size"],
-	            model_update__win_threshold=configs["updateThreshold"],
-	            num_mcst_sims=configs["numMCTSSims"],
-	            c_puct=configs["c_puct"],
-	            know_nothing_training_iters=configs["tempThreshold"],
+	coach.learn(num_train_episodes=configs.num_episodes,
+	            num_training_examples_to_keep=configs.maxlenOfQueue,
+	            checkpoint_folder=configs.checkpoint_dir,
+	            arena_tournament_size=configs.arena_size,
+	            model_update__win_threshold=configs.update_threshold,
+	            num_mcst_sims=configs.num_mcts_sims,
+	            c_puct=configs.c_puct,
+	            know_nothing_training_iters=configs.tempThreshold,
 	            max_cpus=num_threads)
