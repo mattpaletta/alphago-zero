@@ -1,0 +1,49 @@
+MCTS:
+  tempThreshold:
+    default: 15
+  numMCTSSims:
+    default: 5
+
+NNET:
+  checkpoint_dir:
+    default: './checkpoints/'
+
+  load_model:
+    default: False
+
+  load_folder_file:
+    default: ('models/8x100x50', 'best.pth.tar')
+
+Train:
+  num_iters:
+    help: "How many training iterations to perform"
+    default: 3
+
+  num_epsisodes:
+    help: "How many episodes to run per training interation."
+    default: 2
+
+Arena:
+  arena_size:
+    help: "How many games to play in the arena."
+    default: 40
+
+  update_threshold:
+    help: "Percentage of games the new network has to win in the arean."
+    default: 0.6
+
+Other:
+  maxlenOfQueue':
+    default: 10
+  c_puct':
+    default: 1
+  numItersForTrainExamplesHistory:
+    default: 20
+
+  num_threads:
+    help: "How many threads to run, default (cpu_count()-1)"
+    default: 0
+
+  board_size:
+    help: "Size of the game board"
+    default: 19

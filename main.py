@@ -1,28 +1,13 @@
 import logging
 import sys
+from os import cpu_count
 
+from config import Config
 from game import Game
 from nnet import NNet
 from coach import Coach
 
 # TODO:// These are much lower params than the paper describes.
-# TODO:// Turn these into command line arguments with defaults.
-args = {
-	'num_iters': 3,
-	'numEps': 2,
-	'tempThreshold': 15,
-	'updateThreshold': 0.6,
-	'maxlenOfQueue': 10,
-	'numMCTSSims': 5,
-	'arenaCompare': 40,
-	'cpuct': 1,
-	
-	'checkpoint': './checkpoints/',
-	'load_model': False,
-	'load_folder_file': ('models/8x100x50', 'best.pth.tar'),
-	'numItersForTrainExamplesHistory': 20,
-}
-
 
 def setup_logging():
 	root = logging.getLogger()
@@ -38,22 +23,28 @@ def setup_logging():
 if __name__ == "__main__":
 	setup_logging()
 	logging.info("Learning Go!")
-	board_size = 19
 	
+	configs = Config().get_args()
+	
+	board_size = configs["board_size"]
+
+	num_threads = (cpu_count()-1) if configs["num_threads"] == 0 else int(configs["num_threads"])
+
 	game = Game(n=board_size)
 	nnet = NNet(action_size=game.getActionSize(), board_size_x=board_size, board_size_y=board_size)
 	pnet = NNet(action_size=game.getActionSize(), board_size_x=board_size, board_size_y=board_size)
 	coach = Coach(game=game, nnet=nnet, pnet=pnet, num_iters=args["num_iters"])
-	if args["load_model"]:
+	if configs["load_model"]:
 		logging.info("Loading training examples")
 		coach.loadTrainExamples()
-	coach.learn(num_train_episodes=args["numEps"],
-	            num_training_examples_to_keep=args["maxlenOfQueue"],
-				num_training_examples_per_iter=args["num_iters"],
-				checkpoint_folder=args["checkpoint"],
-				arena_model_size=args["arenaCompare"],
-	            model_update__win_threshold=args["updateThreshold"],
-	            num_mcst_sims=args["numMCTSSims"],
-	            cpuct=args["cpuct"],
-	            know_nothing_training_iters=args["tempThreshold"],
-	            max_cpus=4)
+	
+	coach.learn(num_train_episodes=configs["num_epsisodes"],
+	            num_training_examples_to_keep=configs["maxlenOfQueue"],
+	            num_training_examples_per_iter=configs["num_iters"],
+	            checkpoint_folder=configs["checkpoint_dir"],
+	            arena_tournament_size=configs["arena_size"],
+	            model_update__win_threshold=configs["updateThreshold"],
+	            num_mcst_sims=configs["numMCTSSims"],
+	            c_puct=configs["c_puct"],
+	            know_nothing_training_iters=configs["tempThreshold"],
+	            max_cpus=num_threads)

@@ -33,9 +33,9 @@ class Coach(object):
 	          num_training_examples_to_keep,
 	          num_training_examples_per_iter,
 	          checkpoint_folder,
-	          arena_model_size,
+	          arena_tournament_size,
 	          model_update__win_threshold,
-	          cpuct,
+	          c_puct,
 	          num_mcst_sims,
 	          know_nothing_training_iters,
 	          max_cpus):
@@ -68,7 +68,7 @@ class Coach(object):
 				
 				def self_play(game, nnet, i):
 					# logging.debug("Starting MCST")
-					mcts = MCTS(game=game, nnet=nnet, cpuct=cpuct, num_mcst_sims=num_mcst_sims)
+					mcts = MCTS(game=game, nnet=nnet, cpuct=c_puct, num_mcst_sims=num_mcst_sims)
 					x = self.execute_episode(mcts,
 											 know_nothing_training_iters=know_nothing_training_iters,
 											 current_self_play_iteration=i)
@@ -115,11 +115,11 @@ class Coach(object):
 			self.nnet.save_checkpoint(folder=checkpoint_folder, filename='temp.pth.tar')
 			self.pnet.load_checkpoint(folder=checkpoint_folder, filename='temp.pth.tar')
 			
-			prior_mcts = MCTS(self.game, self.pnet, cpuct=cpuct, num_mcst_sims=num_mcst_sims)
+			prior_mcts = MCTS(self.game, self.pnet, cpuct=c_puct, num_mcst_sims=num_mcst_sims)
 			
 			logging.info("Training new network using shuffled training examples.")
 			self.nnet.train(train_examples)
-			new_mcts = MCTS(self.game, self.nnet, cpuct=cpuct, num_mcst_sims=num_mcst_sims)
+			new_mcts = MCTS(self.game, self.nnet, cpuct=c_puct, num_mcst_sims=num_mcst_sims)
 			
 			# TODO:// Run this async, split into separate function.
 			logging.info("Testing network against previous version.")
@@ -128,7 +128,7 @@ class Coach(object):
 			
 			arena = Arena(player1, player2, self.game)
 			
-			pwins, nwins, draws = arena.playGames(arena_model_size, pool)
+			pwins, nwins, draws = arena.playGames(arena_tournament_size, pool)
 			save_training_examples_thread.join()
 			
 			print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
