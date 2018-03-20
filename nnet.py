@@ -1,4 +1,6 @@
 import os
+from threading import Lock
+
 import tensorflow as tf
 import logging
 import numpy as np
@@ -20,6 +22,9 @@ class NNet(object):
 		self.num_epochs = epochs
 		self.batch_size = batch_size
 		self.dropout_rate = dropout_rate
+		
+		# Global lock for the predict function.
+		self.lock = Lock()
 		
 		self.graph = self.__build_model(board_size,
 		                                board_size,
@@ -125,7 +130,7 @@ class NNet(object):
 						},
 						feed_dict=input_dict
 				)
-				logging.info("({0}/{1}:{2}/{3}) PI: {4:03f} V: {5:03f}".format(batch_idx,
+				logging.info("({0}/{1}:{2}/{3}) PI: {4:03f} V: {5:03f}".format(batch_idx+1,
 				                                                             num_batches,
 				                                                             epoch,
 				                                                             self.num_epochs,
@@ -135,6 +140,7 @@ class NNet(object):
 	def predict(self, board):
 		# preparing input
 		board = board[np.newaxis, :, :]
+		self.lock.acquire()
 		res = self.sess.run(
 			fetches={
 				"prob":  self.prob,
@@ -146,6 +152,8 @@ class NNet(object):
 				self.isTraining:    False
 			}
 		)
+		
+		self.lock.release()
 		
 		prob = res["prob"]
 		v = res["value"]

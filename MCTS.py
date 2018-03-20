@@ -97,6 +97,7 @@ class MCTS(object):
 			# TODO:// The final one is 1 or -1 indicating who's turn it is.
 			np_canonical_board = np.asarray(canonical_board).reshape(19, 19, 1)
 			# TODO:// Lock search thread before getting value from NN.
+			
 			action_prob, board_value = self.nnet.predict(np_canonical_board)
 			self.Ps[board_string] = action_prob
 			
