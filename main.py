@@ -28,7 +28,7 @@ if __name__ == "__main__":
 	
 	board_size = configs.board_size
 
-	num_threads = 1 #(cpu_count()-1) if configs.num_threads == 0 else int(configs.num_threads)
+	num_threads = (cpu_count()-1) if configs.num_threads == 0 else int(configs.num_threads)
 
 	game = Game(n=board_size)
 	nnet = NNet(action_size=game.getActionSize(),
