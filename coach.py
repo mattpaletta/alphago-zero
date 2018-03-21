@@ -135,7 +135,7 @@ class Coach(object):
 			print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
 
 			newElo = self.calculatenewElo(self.elo, nwins, pwins)
-			previous_elos.Add(newElo)	
+			self.previous_elos.Add(newElo)	
 			print("elo rating of the newest iteration" + newElo)	
 
 			if pwins + nwins > 0 and float(nwins) / (pwins + nwins) < model_update__win_threshold:
