@@ -134,7 +134,7 @@ class Coach(object):
 			
 			print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
 
-			newElo = self.calculatenewElo(self, self.elo, nwins, pwins)
+			newElo = self.calculatenewElo(self.elo, nwins, pwins)
 			previous_elos.Add(newElo)	
 			print("elo rating of the newest iteration" + newElo)	
 
