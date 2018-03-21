@@ -95,7 +95,9 @@ class Game(object):
 
     def stringRepresentation(self, board):
         # 8x8 numpy array (canonical board)
-        return board.tostring()
+        b = Board(self.n)
+        b.pieces = np.copy(board)
+        return b.get_as_string()
 
 
 def display(board):
