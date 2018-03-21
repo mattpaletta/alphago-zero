@@ -27,6 +27,8 @@ class Coach(object):
 		self.pnet = pnet  # the competitor network
 		self.num_iters = num_iters
 		self.doFirstIterSelfPlay = True  # can be overwritten in loadTrainExamples()
+		self.elo = 1000
+		self.previous_elos = []
 
 	def learn(self,
 	          num_train_episodes,
@@ -124,9 +126,16 @@ class Coach(object):
 			arena = Arena(player1, player2, self.game)
 			
 			pwins, nwins, draws = arena.playGames(arena_tournament_size, pool)
+			#only calculate what happens to the elo of the second player
+
+
 			save_training_examples_thread.join()
 			
 			print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
+
+			newElo = calculatenewElo(self, self.elo, nwins, pwins)
+			previous_elos.Add(newElo)		
+
 			if pwins + nwins > 0 and float(nwins) / (pwins + nwins) < model_update__win_threshold:
 				print('REJECTING NEW MODEL')
 				self.nnet.load_checkpoint(folder=checkpoint_folder, filename='temp.pth.tar')
@@ -134,6 +143,8 @@ class Coach(object):
 				print('ACCEPTING NEW MODEL')
 				self.nnet.save_checkpoint(folder=checkpoint_folder, filename=self.get_examples_checkpoint_file(i))
 				self.nnet.save_checkpoint(folder=checkpoint_folder, filename='best.pth.tar')
+				self.elo = newElo
+			print (self.elo)
 
 	def execute_episode(self, mcst, know_nothing_training_iters, current_self_play_iteration=0):
 		"""
@@ -208,3 +219,12 @@ class Coach(object):
 			self.doFirstIterSelfPlay = True
 
 			return train_examples_history
+
+	def calculatenewElo(self, elo, numWin, numLoss, k = 32):
+		if(numWin>numLoss):
+			newElo = elo+elo/2000*k
+			return calculatenewElo(self, newElo, numWin-1, numLoss, k)
+		elif(numLoss>numWin):
+			newElo = elo-elo/2000*k
+			return calculatenewElo(self, newElo, numWin-1, numLoss, k)
+		return elo
