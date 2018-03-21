@@ -92,6 +92,7 @@ class Coach(object):
 			                                checkpoint_folder=checkpoint_folder,
 			                                trainExamplesHistory=train_examples_history)
 			
+
 			save_training_examples_thread = threading.Thread(target=save_training_examples())
 			save_training_examples_thread.start()
 			
@@ -134,7 +135,8 @@ class Coach(object):
 			print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
 
 			newElo = calculatenewElo(self, self.elo, nwins, pwins)
-			previous_elos.Add(newElo)		
+			previous_elos.Add(newElo)	
+			print("elo rating of the newest iteration" + newElo)	
 
 			if pwins + nwins > 0 and float(nwins) / (pwins + nwins) < model_update__win_threshold:
 				print('REJECTING NEW MODEL')
@@ -223,8 +225,8 @@ class Coach(object):
 	def calculatenewElo(self, elo, numWin, numLoss, k = 32):
 		if(numWin>numLoss):
 			newElo = elo+elo/2000*k
-			return calculatenewElo(self, newElo, numWin-1, numLoss, k)
+			return self.calculatenewElo(newElo, numWin-1, numLoss, k)
 		elif(numLoss>numWin):
 			newElo = elo-elo/2000*k
-			return calculatenewElo(self, newElo, numWin-1, numLoss, k)
+			return self.calculatenewElo(newElo, numWin-1, numLoss, k)
 		return elo
