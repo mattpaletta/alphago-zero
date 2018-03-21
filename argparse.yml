@@ -18,7 +18,7 @@ NNET:
     default: 0.3
 
   batch_size:
-    default: 32
+    default: 16
 
   num_channels:
     default: 256
@@ -27,7 +27,7 @@ NNET:
     default: 0.001
 
   num_epochs:
-    default: 10
+    default: 2
 
   checkpoint_dir:
     default: './checkpoints/'

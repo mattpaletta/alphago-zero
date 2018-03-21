@@ -132,7 +132,7 @@ class NNet(object):
 				)
 				logging.info("({0}/{1}:{2}/{3}) PI: {4:03f} V: {5:03f}".format(batch_idx+1,
 				                                                             num_batches,
-				                                                             epoch,
+				                                                             epoch+1,
 				                                                             self.num_epochs,
 				                                                             res["loss_pi"],
 				                                                             res["loss_v"]))
