@@ -82,11 +82,6 @@ class Coach(object):
 			else:
 				logging.debug("Skipped self play.")
 			
-			while len(train_examples_history) > num_training_examples_to_keep:
-				logging.debug("Training examples history limit exceeded ({0}).  Removing oldest example.".format(
-						num_training_examples_to_keep))
-				train_examples_history.pop(0)
-			
 			def save_training_examples():
 				# backup history to a file
 				# NB! the examples were collected using the model from the previous iteration, so (i-1)
@@ -101,6 +96,12 @@ class Coach(object):
 			# shuffle examples before training
 			logging.debug("Flattening training examples.")
 			train_examples = np.asarray(list(itertools.chain(*train_examples_history)))
+
+			if len(train_examples) > num_training_examples_to_keep:
+				logging.debug("Training examples history limit exceeded ({0}).  Removing oldest examples.".format(
+						num_training_examples_to_keep))
+				train_examples = np.delete(train_examples, range(len(train_examples) - num_training_examples_to_keep))
+
 			logging.info("Shuffling {0} training examples: ".format(len(train_examples)))
 			shuffle(train_examples)
 			

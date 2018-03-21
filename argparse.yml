@@ -57,7 +57,7 @@ Arena:
 
 Other:
   maxlenOfQueue:
-    default: 10
+    default: 10000
 
   numItersForTrainExamplesHistory:
     default: 20
@@ -69,3 +69,7 @@ Other:
   board_size:
     help: "Size of the game board"
     default: 19
+
+  web_server:
+    action: "store_true"
+    default: False

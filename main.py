@@ -8,6 +8,8 @@ from nnet import NNet
 from coach import Coach
 
 # TODO:// These are much lower params than the paper describes.
+from web import WebServer
+
 
 def setup_logging():
 	root = logging.getLogger()
@@ -32,37 +34,46 @@ if __name__ == "__main__":
 
 	game = Game(n=board_size)
 	nnet = NNet(action_size=game.getActionSize(),
-	            board_size=board_size,
-	            learning_rate=configs.learning_rate,
-	            dropout_rate=configs.dropout_rate,
-	            epochs=configs.num_epochs,
+				board_size=board_size,
+				learning_rate=configs.learning_rate,
+				dropout_rate=configs.dropout_rate,
+				epochs=configs.num_epochs,
 				batch_size=configs.batch_size,
-	            num_channels=configs.num_channels,
-	            log_device_placement=configs.log_device_placement)
+				num_channels=configs.num_channels,
+				log_device_placement=configs.log_device_placement)
 	
 	pnet = NNet(action_size=game.getActionSize(),
-	            board_size=board_size,
-	            learning_rate=configs.learning_rate,
-	            dropout_rate=configs.dropout_rate,
-	            epochs=configs.num_epochs,
+				board_size=board_size,
+				learning_rate=configs.learning_rate,
+				dropout_rate=configs.dropout_rate,
+				epochs=configs.num_epochs,
 				batch_size=configs.batch_size,
-	            num_channels=configs.num_channels,
-	            log_device_placement=configs.log_device_placement)
+				num_channels=configs.num_channels,
+				log_device_placement=configs.log_device_placement)
 	
 	coach = Coach(game=game,
-	              nnet=nnet,
-	              pnet=pnet,
-	              num_iters=configs.num_iters)
+				  nnet=nnet,
+				  pnet=pnet,
+				  num_iters=configs.num_iters)
 	if configs.load_model:
 		logging.info("Loading training examples")
 		coach.loadTrainExamples()
-	
+
+	if configs.web_server:
+		web = WebServer(game=game,
+		                nnet=nnet,
+		                checkpoint_folder=configs.checkpoint_dir,
+		                c_puct=configs.c_puct,
+		                num_mcst_sims=configs.num_mcts_sims)
+		web.start_web_server()
+		exit(0)
+
 	coach.learn(num_train_episodes=configs.num_episodes,
-	            num_training_examples_to_keep=configs.maxlenOfQueue,
-	            checkpoint_folder=configs.checkpoint_dir,
-	            arena_tournament_size=configs.arena_size,
-	            model_update__win_threshold=configs.update_threshold,
-	            num_mcst_sims=configs.num_mcts_sims,
-	            c_puct=configs.c_puct,
-	            know_nothing_training_iters=configs.tempThreshold,
-	            max_cpus=num_threads)
+				num_training_examples_to_keep=configs.maxlenOfQueue,
+				checkpoint_folder=configs.checkpoint_dir,
+				arena_tournament_size=configs.arena_size,
+				model_update__win_threshold=configs.update_threshold,
+				num_mcst_sims=configs.num_mcts_sims,
+				c_puct=configs.c_puct,
+				know_nothing_training_iters=configs.tempThreshold,
+				max_cpus=num_threads)
