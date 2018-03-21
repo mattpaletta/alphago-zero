@@ -228,5 +228,5 @@ class Coach(object):
 			return self.calculatenewElo(newElo, numWin-1, numLoss, k)
 		elif(numLoss>numWin):
 			newElo = elo-elo/2000*k
-			return self.calculatenewElo(newElo, numWin-1, numLoss, k)
+			return self.calculatenewElo(newElo, numWin, numLoss-1, k)
 		return elo
