@@ -132,21 +132,21 @@ class Coach(object):
 
 			save_training_examples_thread.join()
 			
-			print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
+			logging.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
 
 			newElo = self.calculatenewElo(self.elo, nwins, pwins)
-			self.previous_elos.Add(newElo)	
-			print("elo rating of the newest iteration" + newElo)	
+			self.previous_elos.append(newElo)	
+			logging.info("elo rating of the newest iteration", newElo)	
 
 			if pwins + nwins > 0 and float(nwins) / (pwins + nwins) < model_update__win_threshold:
-				print('REJECTING NEW MODEL')
+				logging.info('REJECTING NEW MODEL')
 				self.nnet.load_checkpoint(folder=checkpoint_folder, filename='temp.pth.tar')
 			else:
-				print('ACCEPTING NEW MODEL')
+				logging.info('ACCEPTING NEW MODEL')
 				self.nnet.save_checkpoint(folder=checkpoint_folder, filename=self.get_examples_checkpoint_file(i))
 				self.nnet.save_checkpoint(folder=checkpoint_folder, filename='best.pth.tar')
 				self.elo = newElo
-			print (self.elo)
+			logging.info(self.elo)
 
 	def execute_episode(self, mcst, know_nothing_training_iters, current_self_play_iteration=0):
 		"""
