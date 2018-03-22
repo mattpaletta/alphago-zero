@@ -136,7 +136,7 @@ class Coach(object):
 
 			newElo = self.calculatenewElo(self.elo, nwins, pwins)
 			self.previous_elos.Add(newElo)	
-			print("elo rating of the newest iteration" + newElo)	
+			print("elo rating of the newest iteration" + str(newElo))	
 
 			if pwins + nwins > 0 and float(nwins) / (pwins + nwins) < model_update__win_threshold:
 				print('REJECTING NEW MODEL')
