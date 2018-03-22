@@ -135,8 +135,13 @@ class Coach(object):
 			logging.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
 
 			newElo = self.calculatenewElo(self.elo, nwins, pwins)
+<<<<<<< HEAD
 			self.previous_elos.append(newElo)	
 			logging.info("elo rating of the newest iteration", newElo)	
+=======
+			self.previous_elos.Add(newElo)	
+			print("elo rating of the newest iteration" + str(newElo))	
+>>>>>>> master
 
 			if pwins + nwins > 0 and float(nwins) / (pwins + nwins) < model_update__win_threshold:
 				logging.info('REJECTING NEW MODEL')
