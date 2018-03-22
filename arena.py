@@ -1,5 +1,5 @@
 import numpy as np
-
+import logging
 
 class Arena(object):
 	"""
