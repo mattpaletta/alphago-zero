@@ -57,13 +57,13 @@ class Coach(object):
 			
 			# Only play against yourself if either args, or if it's the second iteration
 			if self.doFirstIterSelfPlay:
-				logging.debug("Doing first iteration self play from configs.")
+				logging.info("Doing first iteration self play from configs.")
 			else:
-				logging.debug("Skipping first iteration self play from configs.")
+				logging.info("Skipping first iteration self play from configs.")
 			
 			if self.doFirstIterSelfPlay or i > 0:
 				# iteration_train_examples = deque([], maxlen=num_training_examples_per_iter)
-				logging.debug("Starting {0} training episodes. Running {1} Async".format(num_train_episodes,
+				logging.info("Starting {0} training episodes. Running {1} Async".format(num_train_episodes,
 				                                                                         max_cpus))
 
 				
@@ -79,15 +79,15 @@ class Coach(object):
 				iteration_train_examples = pool.map(functools.partial(self_play, self.game, self.nnet), range(num_train_episodes))
 
 				# save the iteration examples to the history
-				logging.debug("Storing {0} training examples".format(len(iteration_train_examples)))
+				logging.info("Storing {0} training examples".format(len(iteration_train_examples)))
 				train_examples_history.extend(iteration_train_examples)
 			else:
-				logging.debug("Skipped self play.")
+				logging.info("Skipped self play.")
 			
 			def save_training_examples():
 				# backup history to a file
 				# NB! the examples were collected using the model from the previous iteration, so (i-1)
-				logging.debug("Saving model from this iteration.")
+				logging.info("Saving model from this iteration.")
 				self.save_training_examples(iteration=i+1,
 			                                checkpoint_folder=checkpoint_folder,
 			                                trainExamplesHistory=train_examples_history)
