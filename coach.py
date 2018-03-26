@@ -150,7 +150,7 @@ class Coach(object):
 				self.nnet.save_checkpoint(folder=checkpoint_folder, filename=self.get_examples_checkpoint_file(i))
 				self.nnet.save_checkpoint(folder=checkpoint_folder, filename='best.pth.tar')
 				self.elo = newElo
-			print (self.elo)
+			print ("elo at end of iteration: " + str(self.elo))
 
 	def execute_episode(self, mcst, know_nothing_training_iters, current_self_play_iteration=0):
 		"""
