@@ -91,11 +91,13 @@ class MCTS(object):
 		
 		if board_string not in self.Ps:
 			logging.debug("Reached leaf node!")
-			# The neural network only accept boards of (1, 19, 19, 1), so reshape it in numpy.
-			# TODO:// This should be (19, 19, 17)
+			# The neural network only accept boards of (1, board_size, board_size, 1), so reshape it in numpy.
+			# TODO:// This should be (board_size, board_size, 17)
 			# TODO:// The first 16 are the current board and the last 7 for each player
 			# TODO:// The final one is 1 or -1 indicating who's turn it is.
-			np_canonical_board = np.asarray(canonical_board).reshape(19, 19, 1)
+			board_size = Config().get_args().board_size
+	
+			np_canonical_board = np.asarray(canonical_board).reshape(board_size, board_size, 1)
 			# TODO:// Lock search thread before getting value from NN.
 			
 			action_prob, board_value = self.nnet.predict(np_canonical_board)
