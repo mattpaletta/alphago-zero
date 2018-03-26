@@ -111,7 +111,8 @@ class NNet(object):
 				
 				# Reshape so tensorflow is happy.
 				num_boards = len(boards)
-				boards = np.asarray(list(boards)).reshape((num_boards, 19, 19, 1))
+				board_size = Config().get_args().board_size
+				boards = np.asarray(list(boards)).reshape((num_boards, board_size, board_size, 1))
 				
 				# predict and compute gradient and do SDG step
 				input_dict = {
