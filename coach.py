@@ -14,6 +14,8 @@ from random import shuffle
 from arena import Arena
 from MCTS import MCTS
 
+import matplotlib.pyplot as plt
+
 
 class Coach(object):
 	"""
@@ -28,7 +30,7 @@ class Coach(object):
 		self.num_iters = num_iters
 		self.doFirstIterSelfPlay = True  # can be overwritten in loadTrainExamples()
 		self.elo = 1000
-		self.previous_elos = []
+		self.previous_elos = [1000]
 
 	def learn(self,
 	          num_train_episodes,
@@ -135,7 +137,9 @@ class Coach(object):
 			print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
 
 			newElo = self.calculatenewElo(self.elo, nwins, pwins)
-			self.previous_elos.Add(newElo)	
+			self.previous_elos.append(newElo)	
+			plt.plot(self.previous_elos)
+			plt.show()
 			print("elo rating of the newest iteration" + str(newElo))	
 
 			if pwins + nwins > 0 and float(nwins) / (pwins + nwins) < model_update__win_threshold:
