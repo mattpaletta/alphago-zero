@@ -27,7 +27,7 @@ NNET:
     default: 0.001
 
   num_epochs:
-    default: 2
+    default: 10
 
   checkpoint_dir:
     default: './checkpoints/'
@@ -41,10 +41,10 @@ NNET:
 Train:
   num_iters:
     help: "How many training iterations to perform"
-    default: 3
+    default: 10
   num_episodes:
     help: "How many episodes to run per training interation."
-    default: 2
+    default: 10
 
 Arena:
   arena_size:
@@ -68,7 +68,7 @@ Other:
 
   board_size:
     help: "Size of the game board"
-    default: 19
+    default: 9
 
   web_server:
     action: "store_true"
