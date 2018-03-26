@@ -5,6 +5,8 @@ import tensorflow as tf
 import logging
 import numpy as np
 
+from config import Config
+
 
 class NNet(object):
 	def __init__(self,
