@@ -45,9 +45,7 @@ class MCTS(object):
 		
 		# TODO:// Run these all on separate threads
 		for i in range(self.num_mcst_sims):
-			logging.info("Starting MCST simulation: {0}/{1}:{2}".format(i+1,
-			                                                            self.num_mcst_sims,
-			                                                            current_self_play_iteration))
+			#logging.info("Starting MCST simulation: {0}/{1}:{2}".format(i+1, self.num_mcst_sims, current_self_play_iteration))
 			self.search(canonicalBoard)
 		
 		s = self.game.stringRepresentation(canonicalBoard)
