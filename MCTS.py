@@ -2,6 +2,8 @@ import logging
 import math
 from multiprocessing.pool import Pool
 
+from config import Config
+
 import numpy as np
 
 FIRST_PLAYER = 1
