@@ -11,6 +11,11 @@ MCTS:
     default: 1
 
 NNET:
+
+  network_architecture:
+    default: 0
+
+
   log_device_placement:
     default: False
 

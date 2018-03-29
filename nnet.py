@@ -56,33 +56,41 @@ class NNet(object):
 			self.isTraining = tf.placeholder(tf.bool, name="is_training")
 			
 			x_image = tf.reshape(self.input_boards, [-1, board_size_x, board_size_y, 1])
-			h_conv1 = tf.nn.relu(tf.layers.batch_normalization(
-					tf.layers.conv2d(x_image, num_channels, kernel_size=[3, 3], padding='same'), axis=3,
-					training=self.isTraining))  # batch_size  x board_x x board_y x num_channels
-			h_conv2 = tf.nn.relu(tf.layers.batch_normalization(
-					tf.layers.conv2d(h_conv1, num_channels, kernel_size=[3, 3], padding='same'), axis=3,
-					training=self.isTraining))  # batch_size  x board_x x board_y x num_channels
-			h_conv3 = tf.nn.relu(tf.layers.batch_normalization(
-					tf.layers.conv2d(h_conv2, num_channels, kernel_size=[3, 3], padding='valid'), axis=3,
-					training=self.isTraining))  # batch_size  x (board_x-2) x (board_y-2) x num_channels
-			h_conv4 = tf.nn.relu(tf.layers.batch_normalization(
-					tf.layers.conv2d(h_conv3, num_channels, kernel_size=[3, 3], padding='valid'), axis=3,
-					training=self.isTraining))  # batch_size  x (board_x-4) x (board_y-4) x num_channels
-			h_conv4_flat = tf.reshape(h_conv4, [-1, num_channels * (board_size_x - 4) * (board_size_y - 4)])
-			
-			s_fc1 = tf.layers.dropout(
-					inputs=tf.nn.relu(
-							tf.layers.batch_normalization(tf.layers.dense(h_conv4_flat, 1024), axis=1, training=self.isTraining)
-					),
-					rate=self.dropout)  # batch_size x 1024
-			s_fc2 = tf.layers.dropout(
-					inputs=tf.nn.relu(
-							tf.layers.batch_normalization(tf.layers.dense(s_fc1, 512), axis=1, training=self.isTraining)),
-					rate=self.dropout)  # batch_size x 512
 
-			pi = tf.layers.dense(s_fc2, action_size)  # batch_size x self.action_size
+
+			if(Config().get_args().network_architecture == 0):
+				h_conv1 = tf.nn.relu(tf.layers.batch_normalization(
+						tf.layers.conv2d(x_image, num_channels, kernel_size=[3, 3], padding='same'), axis=3,
+						training=self.isTraining))  # batch_size  x board_x x board_y x num_channels
+				h_conv2 = tf.nn.relu(tf.layers.batch_normalization(
+						tf.layers.conv2d(h_conv1, num_channels, kernel_size=[3, 3], padding='same'), axis=3,
+						training=self.isTraining))  # batch_size  x board_x x board_y x num_channels
+				h_conv3 = tf.nn.relu(tf.layers.batch_normalization(
+						tf.layers.conv2d(h_conv2, num_channels, kernel_size=[3, 3], padding='valid'), axis=3,
+						training=self.isTraining))  # batch_size  x (board_x-2) x (board_y-2) x num_channels
+				h_conv4 = tf.nn.relu(tf.layers.batch_normalization(
+						tf.layers.conv2d(h_conv3, num_channels, kernel_size=[3, 3], padding='valid'), axis=3,
+						training=self.isTraining))  # batch_size  x (board_x-4) x (board_y-4) x num_channels
+				h_conv4_flat = tf.reshape(h_conv4, [-1, num_channels * (board_size_x - 4) * (board_size_y - 4)])
+			
+				s_fc1 = tf.layers.dropout(
+						inputs=tf.nn.relu(
+								tf.layers.batch_normalization(tf.layers.dense(h_conv4_flat, 1024), axis=1, training=self.isTraining)
+						),
+						rate=self.dropout)  # batch_size x 1024
+				final = tf.layers.dropout(
+						inputs=tf.nn.relu(
+								tf.layers.batch_normalization(tf.layers.dense(s_fc1, 512), axis=1, training=self.isTraining)),
+						rate=self.dropout)  # batch_size x 512
+
+				
+			#elif(Config().get_args().network_architecture == 1):
+				#make another architecture
+
+
+			pi = tf.layers.dense(final, action_size)  # batch_size x self.action_size
 			self.prob = tf.nn.softmax(pi)
-			self.value = tf.nn.tanh(tf.layers.dense(s_fc2, 1))  # batch_size x 1
+			self.value = tf.nn.tanh(tf.layers.dense(final, 1))  # batch_size x 1
 			
 			self.__calculate_loss(learning_rate=learning_rate,
 			                      action_size=action_size,
