@@ -13,7 +13,7 @@ MCTS:
 NNET:
 
   network_architecture:
-    default: 0
+    default: 1
 
 
   log_device_placement:
