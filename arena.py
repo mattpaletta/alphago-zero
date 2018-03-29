@@ -1,4 +1,5 @@
 import numpy as np
+import logging
 
 
 class Arena(object):
@@ -54,6 +55,7 @@ class Arena(object):
 			assert(self.display)
 			print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)))
 			self.display(board)
+		logging.info("Game completed")
 		return self.game.getGameEnded(board, 1)
 
 
