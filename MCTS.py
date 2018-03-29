@@ -2,6 +2,8 @@ import logging
 import math
 from multiprocessing.pool import Pool
 
+import sys
+
 from config import Config
 
 import numpy as np
@@ -45,26 +47,30 @@ class MCTS(object):
 		
 		# TODO:// Run these all on separate threads
 		for i in range(self.num_mcst_sims):
-			#logging.info("Starting MCST simulation: {0}/{1}:{2}".format(i+1, self.num_mcst_sims, current_self_play_iteration))
-			self.search(canonicalBoard)
+			logging.debug("Starting MCST simulation: {0}/{1}:{2}".format(i+1,
+			                                                            self.num_mcst_sims,
+			                                                            current_self_play_iteration))
+			self.search(canonicalBoard, root_noise=True)
 		
 		s = self.game.stringRepresentation(canonicalBoard)
 		counts = np.asarray([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game_action_size)])
 		
 		# No knowledge from before, so just go to the one with the most visits
 		if temp == 0:
-			logging.info("No knowledge, choosing action with most visits.")
+			logging.debug("No knowledge, choosing action with most visits.")
 			best_action = np.argmax(counts)
 			probs = np.zeros_like(counts)
 			probs[best_action] = 1
 		else:
-			logging.info("Scaling counts for actions.")
+			logging.debug("Scaling counts for actions.")
 			counts = counts ** (1. / temp)
 			probs = counts / float(np.sum(counts))
 		
 		return probs
 	
-	def search(self, canonical_board):
+	def search(self, canonical_board,
+		root_noise=False, root_noise_epsilon=0.25, root_noise_dirichlet=0.03):
+
 		"""
 		This function performs one iteration of MCTS. It is recursively called
 		till a leaf node is found. The action chosen at each node is one that
@@ -77,6 +83,19 @@ class MCTS(object):
 		NOTE: the return values are the negative of the value of the current
 		state. This is done since board_value is in [-1,1] and if board_value is the value of a
 		state for the current player, then its value is -board_value for the other player.
+
+		Params:
+			root_noise:	Additional exploration is achieved by adding Dirichlet
+				noise to the prior probabilities in the root node s0 ,
+				specifically P(s, a) =(1 −​  ε)p_a  +​  εη_a , 
+				where η ∼​  Dir(0.03) and ε =​ 0.25; this noise ensures that all
+				moves may be tried, but the search may still overrule bad moves.
+			root_noise_epsilon: The value to be used for a random path choice
+				defaults 0.25, as given in paper
+			root_noise_dirichlet: Param for the noise function. Defaults 0.03,
+				as given in the paper
+
+
 		Returns:
 			board_value: the negative of the value of the current canonical_board
 		"""
@@ -133,7 +152,14 @@ class MCTS(object):
 			logging.warning("Manually adding valid moves.")
 			self.Vs[board_string] = self.game.getValidMoves(board=canonical_board, player=FIRST_PLAYER)
 			valids = self.Vs[board_string]
-		
+		# add a bit of random noise to the root node of the search tree
+		# this noise ensures that all moves may be tried, but the search may still overrule bad moves
+		priors = self.Ps[board_string]
+		if root_noise:
+			logging.debug("At root, adding noise")
+			diri = np.random.dirichlet(np.full(priors.shape, root_noise_dirichlet), size=None)
+			priors = (1 - root_noise_epsilon)*priors + root_noise_epsilon*diri
+
 		cur_best = -float('inf')
 		best_act = -1
 		
@@ -142,22 +168,24 @@ class MCTS(object):
 
 		# TODO:// What do these equations do?...
 		for a in range(self.game.getActionSize()):
-			if valids[a]:
-				if (board_string, a) in self.Qsa:
-					u = self.Qsa[(board_string, a)] + self.c_puct * self.Ps[board_string][a] * math.sqrt(self.Ns[board_string]) / (
+			if valids[a]: # if action is valid
+				if (board_string, a) in self.Qsa: # if the action at board state has a mean action value
+					# guess the upper bound proportianally to number of visits
+					u = self.Qsa[(board_string, a)] + self.c_puct * priors[a] * math.sqrt(self.Ns[board_string]) / (
 								1 + self.Nsa[(board_string, a)])
 				else:
-					u = self.c_puct * self.Ps[board_string][a] * math.sqrt(self.Ns[board_string] + EPS)  # Q = 0 ?
-				
+					# otherwise guess the upper bound proportionally to number of visits 
+					u = self.c_puct * priors[a] * math.sqrt(self.Ns[board_string] + EPS)  # Q = 0 ?
 				if u > cur_best:
 					cur_best = u
 					best_act = a
 		
+		# update board to go to next state
 		a = best_act
 		next_s, next_player = self.game.getNextState(canonical_board, 1, a)
 		next_s = self.game.getCanonicalForm(next_s, next_player)
 		
-		board_value = self.search(next_s)
+		board_value = self.search(next_s) # note how there is no noise now that we are out of root
 		
 		if (board_string, a) in self.Qsa:
 			self.Qsa[(board_string, a)] = (self.Nsa[(board_string, a)] * self.Qsa[(board_string, a)] + board_value) / (self.Nsa[(board_string, a)] + 1)
