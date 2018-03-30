@@ -12,6 +12,9 @@ MCTS:
 
 NNET:
 
+  root_noise:
+    default: False
+
   network_architecture:
     default: 1
 

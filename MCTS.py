@@ -50,7 +50,7 @@ class MCTS(object):
 			logging.debug("Starting MCST simulation: {0}/{1}:{2}".format(i+1,
 			                                                            self.num_mcst_sims,
 			                                                            current_self_play_iteration))
-			self.search(canonicalBoard, root_noise=True)
+			self.search(canonicalBoard, root_noise=Config().get_args().root_noise)
 		
 		s = self.game.stringRepresentation(canonicalBoard)
 		counts = np.asarray([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game_action_size)])
