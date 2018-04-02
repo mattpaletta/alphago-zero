@@ -15,13 +15,15 @@ class NNet(object):
 	             epochs=10,
 	             batch_size=32,
 	             num_channels=256,
-	             log_device_placement=False): # TODO:// set batch_size=64, num_channels=512
+	             log_device_placement=False,
+	             network_architecture = 0): # TODO:// set batch_size=64, num_channels=512
 		self.BOARD_SIZE_X = board_size
 		self.BOARD_SIZE_Y = board_size
 		self.action_size = action_size
 		self.num_epochs = epochs
 		self.batch_size = batch_size
 		self.dropout_rate = dropout_rate
+		self.network_architecture = network_architecture
 		
 		# Global lock for the predict function.
 		self.lock = Lock()
@@ -58,7 +60,7 @@ class NNet(object):
 			x_image = tf.reshape(self.input_boards, [-1, board_size_x, board_size_y, 1])
 
 
-			if(Config().get_args().network_architecture == 0):
+			if(self.network_architecture == 0):
 				h_conv1 = tf.nn.relu(tf.layers.batch_normalization(
 						tf.layers.conv2d(x_image, num_channels, kernel_size=[3, 3], padding='same'), axis=3,
 						training=self.isTraining))  # batch_size  x board_x x board_y x num_channels
@@ -84,8 +86,8 @@ class NNet(object):
 						rate=self.dropout)  # batch_size x 512
 
 				
-			#same architecture but with 2 residual layers each with 2 convolutional layers within
-			elif(Config().get_args().network_architecture == 1):
+			#similar architecture but with 4 residual layers each with 2 convolutional layers within
+			elif(self.network_architecture == 1):
 
 				h_conv1 = tf.nn.relu(tf.layers.batch_normalization(
 						tf.layers.conv2d(x_image, num_channels, kernel_size=[3, 3], padding='same'), axis=3,
@@ -112,16 +114,34 @@ class NNet(object):
 				h_conv5 = h_conv5+h_conv3
 
 				h_conv6 = tf.nn.relu(tf.layers.batch_normalization(
-						tf.layers.conv2d(h_conv5, num_channels, kernel_size=[3, 3], padding='valid'), axis=3,
-						training=self.isTraining))  # batch_size  x (board_x-2) x (board_y-2) x num_channels
+						tf.layers.conv2d(h_conv5, num_channels, kernel_size=[3, 3], padding='same'), axis=3,
+						training=self.isTraining))  # batch_size  x board_x x board_y x num_channels
 				h_conv7 = tf.nn.relu(tf.layers.batch_normalization(
-						tf.layers.conv2d(h_conv6, num_channels, kernel_size=[3, 3], padding='valid'), axis=3,
+						tf.layers.conv2d(h_conv6, num_channels, kernel_size=[3, 3], padding='same'), axis=3,
+						training=self.isTraining))  # batch_size  x board_x x board_y x num_channels
+				
+				h_conv7 = h_conv7+h_conv5
+
+				h_conv8 = tf.nn.relu(tf.layers.batch_normalization(
+						tf.layers.conv2d(h_conv7, num_channels, kernel_size=[3, 3], padding='same'), axis=3,
+						training=self.isTraining))  # batch_size  x board_x x board_y x num_channels
+				h_conv9 = tf.nn.relu(tf.layers.batch_normalization(
+						tf.layers.conv2d(h_conv8, num_channels, kernel_size=[3, 3], padding='same'), axis=3,
+						training=self.isTraining))  # batch_size  x board_x x board_y x num_channels
+				
+				h_conv9 = h_conv9+h_conv7
+
+				h_conv10 = tf.nn.relu(tf.layers.batch_normalization(
+						tf.layers.conv2d(h_conv9, num_channels, kernel_size=[3, 3], padding='valid'), axis=3,
+						training=self.isTraining))  # batch_size  x (board_x-2) x (board_y-2) x num_channels
+				h_conv11 = tf.nn.relu(tf.layers.batch_normalization(
+						tf.layers.conv2d(h_conv10, num_channels, kernel_size=[3, 3], padding='valid'), axis=3,
 						training=self.isTraining))  # batch_size  x (board_x-4) x (board_y-4) x num_channels
-				h_conv8_flat = tf.reshape(h_conv7, [-1, num_channels * (board_size_x - 4) * (board_size_y - 4)])
+				h_conv12_flat = tf.reshape(h_conv11, [-1, num_channels * (board_size_x - 4) * (board_size_y - 4)])
 			
 				s_fc1 = tf.layers.dropout(
 						inputs=tf.nn.relu(
-								tf.layers.batch_normalization(tf.layers.dense(h_conv8_flat, 1024), axis=1, training=self.isTraining)
+								tf.layers.batch_normalization(tf.layers.dense(h_conv12_flat, 1024), axis=1, training=self.isTraining)
 						),
 						rate=self.dropout)  # batch_size x 1024
 				final = tf.layers.dropout(

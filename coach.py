@@ -23,7 +23,7 @@ class Coach(object):
 	in Game and NeuralNet. args are specified in main.py.
 	"""
 	
-	def __init__(self, game, nnet, pnet, num_iters):
+	def __init__(self, game, nnet, pnet, num_iters, root_noise, board_size):
 		self.game = game
 		self.nnet = nnet
 		self.pnet = pnet  # the competitor network
@@ -31,6 +31,8 @@ class Coach(object):
 		self.doFirstIterSelfPlay = True  # can be overwritten in loadTrainExamples()
 		self.elo = 1000
 		self.previous_elos = [1000]
+		self.root_noise = root_noise
+		self.board_size = board_size
 
 	def learn(self,
 	          num_train_episodes,
@@ -71,7 +73,12 @@ class Coach(object):
 				
 				def self_play(game, nnet, i):
 					# logging.debug("Starting MCST")
-					mcts = MCTS(game=game, nnet=nnet, cpuct=c_puct, num_mcst_sims=num_mcst_sims)
+					mcts = MCTS(game=game, 
+								nnet=nnet, 
+								cpuct=c_puct, 
+								num_mcst_sims=num_mcst_sims, 
+								root_noise = self.root_noise, 
+								board_size = self.board_size)
 					x = self.execute_episode(mcts,
 											 know_nothing_training_iters=know_nothing_training_iters,
 											 current_self_play_iteration=i)
@@ -115,11 +122,21 @@ class Coach(object):
 			self.nnet.save_checkpoint(folder=checkpoint_folder, filename='temp.pth.tar')
 			self.pnet.load_checkpoint(folder=checkpoint_folder, filename='temp.pth.tar')
 			
-			prior_mcts = MCTS(self.game, self.pnet, cpuct=c_puct, num_mcst_sims=num_mcst_sims)
+			prior_mcts = MCTS(	self.game, 
+								self.pnet,  
+								cpuct=c_puct,  
+								num_mcst_sims=num_mcst_sims, 
+								root_noise = self.root_noise, 
+								board_size = self.board_size)
 			
 			logging.info("Training new network using shuffled training examples.")
 			self.nnet.train(train_examples)
-			new_mcts = MCTS(self.game, self.nnet, cpuct=c_puct, num_mcst_sims=num_mcst_sims)
+			new_mcts = MCTS(	self.game,  
+								self.nnet,  
+								cpuct=c_puct,  
+								num_mcst_sims=num_mcst_sims,
+								root_noise = self.root_noise, 
+								board_size = self.board_size)
 			
 			# TODO:// Run this async, split into separate function.
 			logging.info("Testing network against previous version.")

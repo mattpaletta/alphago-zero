@@ -4,8 +4,6 @@ from multiprocessing.pool import Pool
 
 import sys
 
-from config import Config
-
 import numpy as np
 
 FIRST_PLAYER = 1
@@ -21,7 +19,7 @@ class MCTS(object):
 	#keeps track of whose turn it is
 	friendly_turn = -1
 
-	def __init__(self, game, nnet, num_mcst_sims, cpuct):
+	def __init__(self, game, nnet, num_mcst_sims, cpuct, root_noise, board_size):
 		self.game = game
 		self.nnet = nnet
 		self.num_mcst_sims = num_mcst_sims
@@ -35,6 +33,8 @@ class MCTS(object):
 		self.Vs = {}  # stores game.getValidMoves for board s
 		self.num_every_move_valid = 0
 		self.c_puct = cpuct
+		self.root_noise = root_noise
+		self.board_size = board_size
 		
 	def getActionProb(self, canonicalBoard, temp=1, current_self_play_iteration=0):
 		"""
@@ -50,7 +50,7 @@ class MCTS(object):
 			logging.debug("Starting MCST simulation: {0}/{1}:{2}".format(i+1,
 			                                                            self.num_mcst_sims,
 			                                                            current_self_play_iteration))
-			self.search(canonicalBoard, root_noise=Config().get_args().root_noise)
+			self.search(canonicalBoard, root_noise=self.root_noise)
 		
 		s = self.game.stringRepresentation(canonicalBoard)
 		counts = np.asarray([self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game_action_size)])
@@ -114,9 +114,8 @@ class MCTS(object):
 			# TODO:// This should be (board_size, board_size, 17)
 			# TODO:// The first 16 are the current board and the last 7 for each player
 			# TODO:// The final one is 1 or -1 indicating who's turn it is.
-			board_size = Config().get_args().board_size
 	
-			np_canonical_board = np.asarray(canonical_board).reshape(board_size, board_size, 1)
+			np_canonical_board = np.asarray(canonical_board).reshape(self.board_size, self.board_size, 1)
 			# TODO:// Lock search thread before getting value from NN.
 			
 			action_prob, board_value = self.nnet.predict(np_canonical_board)

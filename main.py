@@ -27,23 +27,22 @@ if __name__ == "__main__":
 	logging.info("Learning Go!")
 	
 	configs = Config().get_args()
-	
-	board_size = configs.board_size
 
 	num_threads = (cpu_count()-1) if configs.num_threads == 0 else int(configs.num_threads)
 
-	game = Game(n=board_size)
+	game = Game(n=configs.board_size)
 	nnet = NNet(action_size=game.getActionSize(),
-				board_size=board_size,
+				board_size=configs.board_size,
 				learning_rate=configs.learning_rate,
 				dropout_rate=configs.dropout_rate,
 				epochs=configs.num_epochs,
 				batch_size=configs.batch_size,
 				num_channels=configs.num_channels,
-				log_device_placement=configs.log_device_placement)
+				log_device_placement=configs.log_device_placement,
+				network_architecture = configs.network_architecture)
 	
 	pnet = NNet(action_size=game.getActionSize(),
-				board_size=board_size,
+				board_size=configs.board_size,
 				learning_rate=configs.learning_rate,
 				dropout_rate=configs.dropout_rate,
 				epochs=configs.num_epochs,
@@ -54,7 +53,9 @@ if __name__ == "__main__":
 	coach = Coach(game=game,
 				  nnet=nnet,
 				  pnet=pnet,
-				  num_iters=configs.num_iters)
+				  num_iters=configs.num_iters,
+				  root_noise = configs.root_noise,
+				  board_size = configs.board_size)
 	if configs.load_model:
 		logging.info("Loading training examples")
 		coach.loadTrainExamples()
