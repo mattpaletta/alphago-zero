@@ -155,8 +155,6 @@ class Coach(object):
 
 			newElo = self.calculatenewElo(self.elo, nwins, pwins)
 			self.previous_elos.append(newElo)	
-			plt.plot(self.previous_elos)
-			plt.show()
 			print("elo rating of the newest iteration" + str(newElo))	
 
 			if pwins + nwins > 0 and float(nwins) / (pwins + nwins) < model_update__win_threshold:
@@ -168,6 +166,8 @@ class Coach(object):
 				self.nnet.save_checkpoint(folder=checkpoint_folder, filename='best.pth.tar')
 				self.elo = newElo
 			logging.info ("elo at end of iteration: " + str(self.elo))
+		plt.plot(self.previous_elos)
+		plt.show()
 
 	def execute_episode(self, mcst, know_nothing_training_iters, current_self_play_iteration=0):
 		"""
