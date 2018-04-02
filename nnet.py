@@ -113,6 +113,7 @@ class NNet(object):
 				
 				h_conv5 = h_conv5+h_conv3
 
+"""
 				h_conv6 = tf.nn.relu(tf.layers.batch_normalization(
 						tf.layers.conv2d(h_conv5, num_channels, kernel_size=[3, 3], padding='same'), axis=3,
 						training=self.isTraining))  # batch_size  x board_x x board_y x num_channels
@@ -130,9 +131,10 @@ class NNet(object):
 						training=self.isTraining))  # batch_size  x board_x x board_y x num_channels
 				
 				h_conv9 = h_conv9+h_conv7
+"""
 
 				h_conv10 = tf.nn.relu(tf.layers.batch_normalization(
-						tf.layers.conv2d(h_conv9, num_channels, kernel_size=[3, 3], padding='valid'), axis=3,
+						tf.layers.conv2d(h_conv5, num_channels, kernel_size=[3, 3], padding='valid'), axis=3,
 						training=self.isTraining))  # batch_size  x (board_x-2) x (board_y-2) x num_channels
 				h_conv11 = tf.nn.relu(tf.layers.batch_normalization(
 						tf.layers.conv2d(h_conv10, num_channels, kernel_size=[3, 3], padding='valid'), axis=3,
