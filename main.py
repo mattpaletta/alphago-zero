@@ -48,7 +48,8 @@ if __name__ == "__main__":
 				epochs=configs.num_epochs,
 				batch_size=configs.batch_size,
 				num_channels=configs.num_channels,
-				log_device_placement=configs.log_device_placement)
+				log_device_placement=configs.log_device_placement,
+				network_architecture = configs.network_architecture)
 	
 	coach = Coach(game=game,
 				  nnet=nnet,
