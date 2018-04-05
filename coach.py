@@ -197,7 +197,7 @@ class Coach(object):
 			temp = int(episodeStep < know_nothing_training_iters)
 			
 			pi = mcst.getActionProb(canonicalBoard,
-			                        temp=temp,
+			                        temp=know_nothing_training_iters,
 			                        current_self_play_iteration=current_self_play_iteration)
 			sym = self.game.getSymmetries(canonicalBoard, pi)
 			for b, p in sym:

@@ -167,7 +167,7 @@ class NNet(object):
 	def __calculate_loss(self, learning_rate, action_size, value, prob):
 		self.target_pis = tf.placeholder(tf.float32, shape=[None, action_size])
 		self.target_vs = tf.placeholder(tf.float32, shape=[None])
-		self.loss_pi = tf.losses.softmax_cross_entropy(self.target_pis, prob)
+		self.loss_pi = tf.losses.softmax_cross_entropy(self.prob, prob)
 		self.loss_v = tf.losses.mean_squared_error(self.target_vs, tf.reshape(value, shape=[-1, ]))
 		total_loss = self.loss_pi + self.loss_v
 		update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
