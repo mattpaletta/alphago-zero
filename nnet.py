@@ -179,7 +179,7 @@ class NNet(object):
 			num_batches = int(len(examples) / self.batch_size)
 			for batch_idx in range(num_batches):
 				sample_ids = np.random.randint(len(examples), size=self.batch_size)
-				boards, pis, vs = list(zip(*[examples[i] for i in sample_ids]))
+				boards, pis, vs = list(zip(*[examples[i] for i in sample_ids if i is not None]))
 				
 				# Reshape so tensorflow is happy.
 				num_boards = len(boards)

@@ -174,10 +174,7 @@ class MCTS(object):
 								1 + self.Nsa[(board_string, a)])
 				else:
 					# otherwise guess the upper bound proportionally to number of visits 
-					try:
-						u = self.c_puct * priors[a] * math.sqrt(self.Ns[board_string] + EPS)  # Q = 0 ?
-					except KeyError: # board not visited
-						u = self.c_puct * priors[a] * math.sqrt(EPS)
+					u = self.c_puct * priors[a] * math.sqrt(self.Ns[board_string] + EPS)  # Q = 0 ?
 				if u > cur_best:
 					cur_best = u
 					best_act = a
