@@ -25,7 +25,7 @@ def setup_logging():
 if __name__ == "__main__":
 	setup_logging()
 	logging.info("Learning Go!")
-	
+	sys.setrecursionlimit(2500) # arbitrary
 	configs = Config().get_args()
 
 	num_threads = (cpu_count()-1) if configs.num_threads == 0 else int(configs.num_threads)
