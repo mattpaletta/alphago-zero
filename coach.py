@@ -104,7 +104,6 @@ class Coach(object):
 
 			save_training_examples_thread = threading.Thread(target=save_training_examples())
 			save_training_examples_thread.start()
-			save_training_examples_thread.join()
 			
 			# shuffle examples before training
 			logging.debug("Flattening training examples.")
@@ -150,6 +149,7 @@ class Coach(object):
 			#only calculate what happens to the elo of the second player
 
 
+			save_training_examples_thread.join()
 			
 			logging.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
 
