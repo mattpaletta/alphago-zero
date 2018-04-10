@@ -4,7 +4,7 @@ from collections import deque
 import functools
 
 import itertools
-from multiprocess import Pool
+from multiprocess.dummy import Pool
 import numpy as np
 import os
 import sys
