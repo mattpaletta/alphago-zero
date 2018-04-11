@@ -376,8 +376,8 @@ class NNet(object):
 				sample_ids = np.random.randint(len(examples), size=self.batch_size)
 				try:
 					boards, pis, vs = list(zip(*[examples[i] for i in sample_ids if examples[i] is not None or examples[i] != ()]))
-				except KeyError:
-					logging.error("Some sort of KeyError here...", zip(*[examples[i] for i in sample_ids if examples[i] is not None or examples[i] != ()]))
+				except (KeyError, TypeError) as e:
+					logging.error(e, zip(*[examples[i] for i in sample_ids if examples[i] is not None or examples[i] != ()]))
 				
 				# Reshape so tensorflow is happy.
 				num_boards = len(boards)
