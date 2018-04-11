@@ -377,7 +377,7 @@ class NNet(object):
 				try:
 					boards, pis, vs = list(zip(*[examples[i] for i in sample_ids if examples[i] is not None or examples[i] != ()]))
 				except (KeyError, TypeError) as e:
-					logging.error(e, zip(*[examples[i] for i in sample_ids if examples[i] is not None or examples[i] != ()]))
+					logging.critical(e, zip(*[examples[i] for i in sample_ids if examples[i] is not None or examples[i] != ()]))
 				
 				# Reshape so tensorflow is happy.
 				num_boards = len(boards)
