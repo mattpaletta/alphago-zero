@@ -374,7 +374,10 @@ class NNet(object):
 			num_batches = int(len(examples) / self.batch_size)
 			for batch_idx in range(num_batches):
 				sample_ids = np.random.randint(len(examples), size=self.batch_size)
-				boards, pis, vs = list(zip(*[examples[i] for i in sample_ids if examples[i] is not None]))
+				try:
+					boards, pis, vs = list(zip(*[examples[i] for i in sample_ids if examples[i] is not None or examples[i] != ()]))
+				except KeyError:
+					logging.error("Some sort of KeyError here...", zip(*[examples[i] for i in sample_ids if examples[i] is not None or examples[i] != ()]))
 				
 				# Reshape so tensorflow is happy.
 				num_boards = len(boards)
