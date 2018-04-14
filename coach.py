@@ -82,7 +82,7 @@ class Coach(object):
 					x = self.execute_episode(mcts,
 											 know_nothing_training_iters=know_nothing_training_iters,
 											 current_self_play_iteration=i)
-
+					logging.info("Done episode {0} of self play.".format(i))
 					return x
 
 				iteration_train_examples = pool.map(functools.partial(self_play, self.game, self.nnet), range(num_train_episodes))

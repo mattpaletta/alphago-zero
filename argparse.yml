@@ -4,7 +4,7 @@ MCTS:
     help: "Temperature threshold.  From paper, helps with network cold start."
 
   num_mcts_sims:
-    default: 5
+    default: 1600
     help: "How many Monte Carlo Tree Simulations to perform per action (at training time)"
 
   c_puct:
@@ -52,7 +52,7 @@ Train:
     default: 10
   num_episodes:
     help: "How many episodes to run per training interation."
-    default: 10
+    default: 1000
 
 Arena:
   arena_size:
