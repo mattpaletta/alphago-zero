@@ -90,7 +90,7 @@ class NNet(object):
 
 
 
-			#2 residual blocks each with 2 convolutional layers within. seperate policy and value networks
+			#4 layer convolutional architecture with 2 fully connected layers. seperate policy and value networks
 			elif(self.network_architecture == 1):
 				h_conv1 = tf.nn.relu(tf.layers.batch_normalization(
 						tf.layers.conv2d(x_image, num_channels, kernel_size=[3, 3], padding='same'), axis=3,
