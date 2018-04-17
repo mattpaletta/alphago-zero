@@ -1,3 +1,6 @@
+#original code https://github.com/suragnair/alpha-zero-general
+
+
 import logging
 import math
 from multiprocessing.pool import Pool
