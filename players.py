@@ -1,3 +1,5 @@
+#original code https://github.com/suragnair/alpha-zero-general
+
 class RandomPlayer():
     def __init__(self, game):
         self.game = game
