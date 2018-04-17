@@ -1,3 +1,5 @@
+#original code https://github.com/suragnair/alpha-zero-general
+
 import logging
 import sys
 from os import cpu_count
