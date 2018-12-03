@@ -1,4 +1,4 @@
-#Alpha Go Zero
+# Alpha Go Zero
 original code https://github.com/suragnair/alpha-zero-general
 
 Implementation of AlphaGo-Zero in Python + Tensorflow
