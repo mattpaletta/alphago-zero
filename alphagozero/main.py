@@ -4,10 +4,10 @@ import logging
 import sys
 from os import cpu_count
 
-from config import Config
-from game import Game
-from nnet import NNet
-from coach import Coach
+from alphagozero.config import Config
+from alphagozero.game import Game
+from alphagozero.nnet import NNet
+from alphagozero.coach import Coach
 
 # TODO:// These are much lower params than the paper describes.
 from web import WebServer

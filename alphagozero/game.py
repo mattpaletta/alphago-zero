@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from board import Board
+from alphagozero.board import Board
 
 
 class Game(object):

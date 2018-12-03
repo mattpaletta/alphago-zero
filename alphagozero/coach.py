@@ -13,8 +13,8 @@ import sys
 from pickle import Pickler, Unpickler
 from random import shuffle
 
-from arena import Arena
-from MCTS import MCTS
+from alphagozero.arena import Arena
+from alphagozero.MCTS import MCTS
 
 import matplotlib.pyplot as plt
 
