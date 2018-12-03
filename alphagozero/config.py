@@ -2,10 +2,10 @@
 
 import argparse
 import yaml
-
+from typing import Dict, Union
 
 class Config(object):
-    def get_args(self):
+    def get_args(self) -> argparse.Namespace:
 
         DATA_PATH = "argparse.yml"
 

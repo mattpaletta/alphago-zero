@@ -10,10 +10,10 @@ from alphagozero.nnet import NNet
 from alphagozero.coach import Coach
 
 # TODO:// These are much lower params than the paper describes.
-from web import WebServer
+from alphagozero.web import WebServer
 
 
-def setup_logging():
+def setup_logging() -> None:
 	root = logging.getLogger()
 	root.setLevel(logging.INFO)
 	
